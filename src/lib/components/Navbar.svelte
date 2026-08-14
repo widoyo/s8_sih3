@@ -83,8 +83,8 @@
 			</div>
 			<div class="flex flex-col">
 				<div class="flex items-center gap-2">
-					<span class="font-black text-lg tracking-tight text-[#002D62] dark:text-blue-400">
-						SIH3 WS MSBL
+					<span class="font-normal text-lg text-blue-950 dark:text-blue-400">
+						SIH3 Wilayah Sungai MSBL
 					</span>
 				</div>
 				<span class="text-[10px] opacity-75 hidden sm:block font-semibold tracking-wide uppercase">

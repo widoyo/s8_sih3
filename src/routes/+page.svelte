@@ -71,15 +71,12 @@
 		<div class="absolute right-1/4 top-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
 		<div class="relative z-10 max-w-3xl space-y-3">
-			<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFCC00] text-[#002D62] text-xs font-black uppercase tracking-wider shadow-md">
-				KEMENTERIAN PEKERJAAN UMUM • BALAI BESAR WILAYAH SUNGAI SUMATERA VIII
-			</div>
 			
 			<div class="space-y-1">
-				<h1 class="text-3xl md:text-5xl font-black tracking-tight text-white drop-shadow-md">
+				<h1 class="text-3xl md:text-5xl font-thin text-white drop-shadow-md">
 					PORTAL SIH3 Wilayah Sungai MSBL
 				</h1>
-				<h2 class="text-base md:text-lg font-bold text-amber-300">
+				<h2 class="text-base md:text-lg text-amber-300">
 					Sistem Informasi Hidro Meteorologi, Hidrologi, & HidroGeologi
 				</h2>
 			</div>
@@ -88,6 +85,27 @@
 				Integrasi data terpadu pemantauan cuaca BMKG, tinggi muka air pos duga air hidrologi, dan cekungan air tanah di Wilayah Sungai Musi Sugihan Banyuasin Lemau (WS MSBL).
 			</p>
 		</div>
+	</div>
+
+	<!-- Berita dari partner -->
+	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+		{#each kpiStats as stat (stat.value)}
+			<div class="card card-compact bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-all duration-200">
+				<div class="card-body flex-row items-center justify-between">
+					<div class="space-y-1">
+						<span class="text-xs font-semibold opacity-70">Judul Berita</span>
+						<div class="flex items-baseline gap-2">
+							<span class="text-2xl font-extrabold text-base-content">{stat.value}</span>
+							<span class="badge badge-sm font-semibold">status</span>
+						</div>
+						<span class="text-[10px] opacity-60 block">{stat.subtext}</span>
+					</div>
+					<div class="w-12 h-12 rounded-2xl bg-base-200 flex items-center justify-center text-2xl shadow-inner">
+						{stat.icon}
+					</div>
+				</div>
+			</div>
+		{/each}
 	</div>
 
 	<!-- KPI Summary Cards Grid -->

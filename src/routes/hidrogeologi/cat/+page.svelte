@@ -1,0 +1,1 @@
+Cekungan / Cadangan Air Tanah (CAT) merupakan salah satu komponen penting dalam sistem hidrologi yang berperan dalam penyimpanan dan pergerakan air di bawah permukaan tanah. CAT terdiri dari berbagai lapisan tanah dan batuan yang memiliki kemampuan untuk menyimpan air, yang kemudian dapat dimanfaatkan untuk berbagai keperluan, termasuk irigasi, kebutuhan domestik, dan industri.

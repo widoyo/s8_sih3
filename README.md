@@ -1,42 +1,58 @@
-# sv
+# SIH3 Wilayah Sungai Musi-Sugihan-Banyuasin-Lemau
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+## Peta Situs
 
-## Creating a project
+1. Prakiraan dan EWS
+  1. Prakiraan Cuaca
+  2. Peringatan Dini
+2. Monitoring Hidrologi 
+  1. Curah Hujan
+  2. Tinggi Muka Air, Debit Sungai
+  3. Bendungan, Embung
+3. Geologi
+  1. Cekungan Air Tanah
+  2. Peta Air Tanah
+  3. Sumur Pantau
+4. Berita & Kemitraan
+  1. Berita Utama: Artikel teknis & kondisi lingkungan
+  2. Informasi kegiatan dari Mitra
+5. Publikasi & Layanan
+  1. Unduh laporan
+  2. Layanan permintaan data
+6. Profil & Informasi
+  1. Tentang Portal: Latar belakang, dasar hukum, standar operasi
+  2. Kontak dan Layanan
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Tahapan Implementasi & Iterasi Pengembangan
 
-```sh
-# create a new project
-npx sv create my-app
-```
+Pekerjaan diselesaikan secara bertahap untuk memastikan kualitas data dan sistem dasar terbentuk dengan kuat.
 
-To recreate this project with the same configuration:
+### Iterasi 1: Core Shell, Navigation & Placeholder
 
-```sh
-# recreate this project
-npx sv@0.17.0 create --template minimal --types ts --add tailwindcss="plugins:typography,forms" drizzle="database:sqlite+sqlite:better-sqlite3" prettier eslint --install npm s8_sih3
-```
+Fokus: menghasilkan sistem yang hidup (live) sejak dini.
 
-## Developing
+Output: 
+  * Web Portal aktif, dapat diakses dengan layar kecil hingga layar desktop
+  * Seluruh menu utama dan sub menu telah dapat diklik dengan tampilan dasar
+  * Format table, grafik dan skema filter sudah terlihat jelas
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+### Iterasi 2: Data Engine, Integrasi API
 
-```sh
-npm run dev
+Fokus: Mengganti tampilan contoh ke tampailan data yang sebenarnya
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+Output:
+  * Aplikasi telah menampilkan data yang sebenarnya
 
-## Building
+### Iterasi 3: GIS Engine & Visualisasi Interaktif
 
-To create a production version of your app:
+Fokus: Visualisasi dalam bentuk peta
 
-```sh
-npm run build
-```
+Output:
+  * Peta interaktif
 
-You can preview the production build with `npm run preview`.
+### Iterasi 4: Otomasi, Penyempurnaan Akhir
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+Fokus: Penyempurnaan, otomasi penarikan data
+
+Output:
+  * Sistem SIH3 yang lengkap, berjalan mandiri
