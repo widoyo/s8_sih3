@@ -63,29 +63,8 @@
 </svelte:head>
 
 <div class="space-y-6">
-	<!-- Hero Welcome Banner - Signature Ministry of PU (Kementerian PU) Deep Blue & Yellow Accent -->
-	<div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#002D62] via-[#0D47A1] to-[#001D4A] text-white p-6 md:p-8 shadow-2xl border-b-4 border-[#FFCC00]">
-		<div class="absolute -right-6 -bottom-8 opacity-10 text-9xl select-none pointer-events-none font-bold">
-			🌊
-		</div>
-		<div class="absolute right-1/4 top-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-		<div class="relative z-10 max-w-3xl space-y-3">
-			
-			<div class="space-y-1">
-				<h1 class="text-3xl md:text-5xl font-thin text-white drop-shadow-md">
-					PORTAL SIH3 Wilayah Sungai MSBL
-				</h1>
-				<h2 class="text-base md:text-lg text-amber-300">
-					Sistem Informasi Hidro Meteorologi, Hidrologi, & HidroGeologi
-				</h2>
-			</div>
-
-			<p class="text-sm md:text-base opacity-90 leading-relaxed pt-1 text-blue-50">
-				Integrasi data terpadu pemantauan cuaca BMKG, tinggi muka air pos duga air hidrologi, dan cekungan air tanah di Wilayah Sungai Musi Sugihan Banyuasin Lemau (WS MSBL).
-			</p>
-		</div>
-	</div>
+	<div class="text-red-500 uppercase">Peringatan Dini Cuaca</div>
 
 	<!-- Berita dari partner -->
 	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

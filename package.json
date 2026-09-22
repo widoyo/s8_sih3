@@ -12,10 +12,14 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
+		"scrape": "tsx src/lib/server/bmkgService.ts",
+		"scrape-bbws8": "tsx src/lib/server/bbwss8Service.ts",
 		"db:push": "drizzle-kit push",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
-		"db:studio": "drizzle-kit studio"
+		"db:studio": "drizzle-kit studio",
+		"db:seed": "tsx src/lib/server/db/seed.ts",
+		"db:sync-bmkg": "tsx src/lib/server/api/bmkg.ts"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
@@ -27,6 +31,7 @@
 		"@tailwindcss/vite": "^4.3.3",
 		"@types/better-sqlite3": "^7.6.13",
 		"@types/node": "^22",
+		"dotenv": "^17.4.2",
 		"drizzle-kit": "^0.31.10",
 		"drizzle-orm": "^0.45.2",
 		"eslint": "^10.4.1",
@@ -39,14 +44,17 @@
 		"svelte": "^5.56.1",
 		"svelte-check": "^4.6.0",
 		"tailwindcss": "^4.3.3",
+		"tsx": "^4.23.13",
 		"typescript": "^6.0.3",
 		"typescript-eslint": "^8.60.1",
 		"vite": "^8.0.16"
 	},
 	"dependencies": {
+		"@sveltejs/adapter-node": "^5.5.7",
 		"@types/leaflet": "^1.9.22",
 		"better-sqlite3": "^13.0.2",
 		"daisyui": "^5.7.16",
-		"leaflet": "^1.9.4"
+		"leaflet": "^1.9.4",
+		"linkedom": "^0.18.13"
 	}
 }

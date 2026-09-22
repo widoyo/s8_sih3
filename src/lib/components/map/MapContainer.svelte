@@ -13,6 +13,9 @@
 	let isMapLoaded = $state(false);
 	let stationCount = $state({ awlr: 0, arr: 0, aws: 0, cctv: 0 });
 
+	// Tempat menyimpan LayerGroup untuk masing-masing filter
+    let layers = $state<Record<string, any>>({});
+
 	// Overlay Layer Filter States (Svelte 5 Runes)
 	let overlayFilters = $state({
 		tma: true,
@@ -52,9 +55,17 @@
 
 					L.control.zoom({ position: 'bottomright' }).addTo(mapInstance);
 
+					// 1. Inisialisasi LayerGroup untuk setiap kategori
+                    const layerGroups = {
+                        tma: L.layerGroup(),
+                        curahHujan: L.layerGroup(),
+                        bmkgWarning: L.layerGroup(),
+                        cctv: L.layerGroup(),
+                        catEsdm: L.layerGroup()
+                    };
 					// Fetch Live Stations from ATAB API endpoint
 					try {
-						const res = await fetch('/api/hydrology/stations');
+						const res = await fetch('/api/hidrologi/stations');
 						const data = await res.json();
 						if (data.success && Array.isArray(data.stations)) {
 							let awlr = 0, arr = 0, aws = 0, cctv = 0;
@@ -65,26 +76,31 @@
 								let iconHtml = '💧';
 								let badgeColor = 'bg-primary text-white';
 								let typeName = 'AWLR (TMA)';
+								let targetLayer = layerGroups.tma;
 
 								if (stn.station_type === 1) {
 									iconHtml = '🌧️';
 									badgeColor = 'bg-info text-white';
 									typeName = 'ARR (Curah Hujan)';
+									targetLayer = layerGroups.curahHujan;
 									arr++;
 								} else if (stn.station_type === 2) {
 									iconHtml = '💧';
 									badgeColor = 'bg-blue-600 text-white';
 									typeName = 'AWLR (Tinggi Muka Air)';
+									targetLayer = layerGroups.tma;
 									awlr++;
 								} else if (stn.station_type === 3) {
 									iconHtml = '⛅';
 									badgeColor = 'bg-warning text-black';
 									typeName = 'AWS (Stasiun Cuaca)';
+									targetLayer = layerGroups.bmkgWarning;
 									aws++;
 								} else if (stn.station_type === 4) {
 									iconHtml = '📷';
 									badgeColor = 'bg-purple-600 text-white';
 									typeName = 'CCTV / PTZ';
+									targetLayer = layerGroups.cctv;
 									cctv++;
 								}
 
@@ -95,7 +111,7 @@
 									iconAnchor: [14, 14]
 								});
 
-								L.marker([stn.latitude, stn.longitude], { icon: customIcon })
+								const marker = L.marker([stn.latitude, stn.longitude], { icon: customIcon })
 									.addTo(mapInstance)
 									.bindPopup(`
 										<div class="p-2 text-xs">
@@ -109,6 +125,7 @@
 											<p class="text-[10px] text-gray-400 mt-1">ID Stasiun ATAB: #${stn.id}</p>
 										</div>
 									`);
+								marker.addTo(targetLayer);
 							});
 
 							stationCount = { awlr, arr, aws, cctv };
@@ -117,6 +134,7 @@
 						console.warn('API station fetch note:', apiErr);
 					}
 
+					layers = layerGroups;
 					isMapLoaded = true;
 				}
 			} catch (err) {
@@ -133,6 +151,26 @@
 			}
 		};
 	});
+
+	// 3. Svelte 5 Effect untuk reaktivitas filter layer
+    $effect(() => {
+        if (!mapInstance) return;
+        // Toggle Layer berdasarkan nilai boolean di overlayFilters
+        Object.entries(overlayFilters).forEach(([key, isEnabled]) => {
+            const layerGroup = layers[key];
+            if (!layerGroup) return;
+
+            if (isEnabled) {
+                if (!mapInstance.hasLayer(layerGroup)) {
+                    mapInstance.addLayer(layerGroup);
+                }
+            } else {
+                if (mapInstance.hasLayer(layerGroup)) {
+                    mapInstance.removeLayer(layerGroup);
+                }
+            }
+        });
+    });
 </script>
 
 <div class="relative w-full rounded-2xl overflow-hidden border border-base-300 shadow-md bg-base-200">
