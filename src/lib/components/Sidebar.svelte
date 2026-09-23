@@ -84,18 +84,12 @@
 					<ul class="pl-4 mt-1 space-y-0.5 border-l-2 border-base-200 ml-5">
 						<li>
 							<a href="{resolve("/hidrologi/tma")}" class="py-2 text-xs flex justify-between {isActive('/hidrologi/tma') ? 'active font-semibold' : ''}" onclick={onCloseSidebar}>
-								<span>Tinggi Muka Air (TMA)</span>
-								<span class="badge badge-success badge-xs font-mono">Realtime</span>
+								<span>Stasiun Duga Air</span>
 							</a>
 						</li>
 						<li>
-							<a href="/hidrologi/curah-hujan" class="py-2 text-xs {isActive('/hidrologi/curah-hujan') ? 'active font-semibold' : ''}" onclick={onCloseSidebar}>
-								Pos Curah Hujan (CH)
-							</a>
-						</li>
-						<li>
-							<a href="/hidrologi/bendungan" class="py-2 text-xs {isActive('/hidrologi/bendungan') ? 'active font-semibold' : ''}" onclick={onCloseSidebar}>
-								Status Bendungan & Waduk
+							<a href="{resolve("/hidrologi/hujan")}" class="py-2 text-xs {isActive('/hidrologi/hujan') ? 'active font-semibold' : ''}" onclick={onCloseSidebar}>
+								Stasiun Curah Hujan
 							</a>
 						</li>
 					</ul>

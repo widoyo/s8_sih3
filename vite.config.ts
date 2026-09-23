@@ -24,5 +24,9 @@ export default defineConfig({
 				}
 			}
 		})
-	]
+	],
+	ssr: {
+    // Memaksa Vite memproses komponen .svelte milik Lucide saat SSR
+    noExternal: ['@lucide/svelte']
+  }
 });

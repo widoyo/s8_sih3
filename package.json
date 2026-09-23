@@ -50,6 +50,7 @@
 		"vite": "^8.0.16"
 	},
 	"dependencies": {
+		"@lucide/svelte": "^1.47.0",
 		"@sveltejs/adapter-node": "^5.5.7",
 		"@types/leaflet": "^1.9.22",
 		"better-sqlite3": "^13.0.2",

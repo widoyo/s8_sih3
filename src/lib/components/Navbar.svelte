@@ -76,7 +76,7 @@
 		</button>
 
 		<a href={resolve("/")} class="flex items-center gap-3 group">
-			<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#002D62] via-[#0D47A1] to-[#FFCC00] p-0.5 shadow-md group-hover:scale-105 transition-transform duration-200">
+			<div class="w-10 h-10 rounded-xl bg-linear-to-br from-[#002D62] via-[#0D47A1] to-[#FFCC00] p-0.5 shadow-md group-hover:scale-105 transition-transform duration-200">
 				<div class="w-full h-full bg-[#002D62] text-[#FFCC00] rounded-[10px] flex items-center justify-center font-black text-xl shadow-inner">
 					🌊
 				</div>
@@ -114,15 +114,6 @@
 		<div class="hidden xl:flex flex-col text-right pr-2 border-r border-base-300">
 			<span class="font-mono text-xs font-bold text-primary tracking-wider">{currentTime}</span>
 			<span class="text-[10px] opacity-70 font-medium">{currentDate}</span>
-		</div>
-
-		<!-- BMKG Status Badge -->
-		<div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success/10 text-success text-xs font-semibold border border-success/20">
-			<span class="relative flex h-2 w-2">
-				<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-				<span class="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
-			</span>
-			<span>BMKG Sync: Aktif</span>
 		</div>
 
 		<!-- Notifications Dropdown -->

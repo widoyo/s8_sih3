@@ -1,9 +1,9 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
-@plugin "daisyui" { themes: light };
+@plugin "daisyui";
 
-@source "../";
+/* @source "../"; */
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {

@@ -14,7 +14,7 @@
 </script>
 
 <svelte:head>
-	<title>Tinggi Muka Air (TMA) AWLR | SIH3 MSBL</title>
+	<title>Stasiun Duga Air | SIH3 MSBL</title>
 </svelte:head>
 
 <div class="space-y-6">
@@ -22,10 +22,10 @@
 	<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-base-200 pb-3">
 		<div>
 			<h1 class="text-xl md:text-2xl font-bold flex items-center gap-2">
-				<span class="text-primary">💧</span> Pos Duga Air / AWLR (Automatic Water Level Recorder)
+				<span class="text-primary">💧</span> Stasiun Duga Air 
 			</h1>
 			<p class="text-xs opacity-70">
-				Data pemantauan tinggi muka air real-time dari API Gateway ATAB BBWS Sumatera VIII.
+				Data pemantauan tinggi muka air real-time dari API Gateway BBWS Sumatera VIII.
 			</p>
 		</div>
 		<div class="flex items-center gap-2">
@@ -54,13 +54,11 @@
 					<thead>
 						<tr class="text-xs">
 							<th>ID</th>
-							<th>Nama Stasiun AWLR</th>
+							<th>Nama Stasiun</th>
 							<th>Sungai</th>
 							<th>Lokasi</th>
 							<th>Koordinat (Lat, Lng)</th>
 							<th>Elevasi / Delta</th>
-							<th>Status Alert</th>
-							<th>Tipe</th>
 						</tr>
 					</thead>
 					<tbody class="text-xs">
@@ -75,14 +73,6 @@
 								</td>
 								<td class="font-mono text-[11px]">
 									{station.elevasi ?? '-'} m {station.delta_mdpl ? `(Δ ${station.delta_mdpl}m)` : ''}
-								</td>
-								<td>
-									<span class="badge {station.siaga === 1 ? 'badge-success' : 'badge-warning'} badge-xs font-bold">
-										{station.siaga === 1 ? 'NORMAL' : 'WASPADA'}
-									</span>
-								</td>
-								<td>
-									<span class="badge badge-ghost badge-xs font-mono">AWLR</span>
 								</td>
 							</tr>
 						{:else}
