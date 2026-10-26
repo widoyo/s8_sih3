@@ -1,3 +1,6 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+
 export interface BeritaItem {
   id?: string | number;
   title: string;
@@ -16,6 +19,8 @@ export interface BBWS8Cache {
 const cache = new Map<string, BBWS8Cache>();
 const CACHE_KEY = 'bbws8_berita';
 const UPDATE_INTERVAL_MS = 15 * 60 * 1000; // 15 menit
+const DATA_DIR = path.resolve(process.cwd(), 'data');
+const DATA_FILE = path.join(DATA_DIR, 'berita_bbwss8.json');
 
 let isTimerStarted = false;
 
@@ -53,7 +58,7 @@ export async function fetchBBWS8BeritaFromAPI(): Promise<BBWS8Cache> {
   rawItems.forEach((item: any) => {
     const title = item.judul || item.title || '';
     const slug = item.slug || item.id || '';
-    const imagePath = item.gambar || item.image || item.foto || '';
+    const imagePath = item.gambar || item.img || item.foto || '';
     const rawExcerpt = item.ringkasan || item.excerpt || item.deskripsi || '';
 
     // Sanitisasi HTML/tag jika ada
@@ -64,11 +69,11 @@ export async function fetchBBWS8BeritaFromAPI(): Promise<BBWS8Cache> {
         id: item.id,
         title,
         link: slug
-          ? `https://sda.pu.go.id/balai/bbwssumatera8/berita/${slug}`
+          ? `https://sda.pu.go.id/balai/bbwssumatera8/berita/#detail?id=${slug}`
           : 'https://sda.pu.go.id/balai/bbwssumatera8/berita',
         image: imagePath.startsWith('http')
           ? imagePath
-          : `https://sda.pu.go.id/balai/bbwssumatera8/uploads/berita/${imagePath}`,
+          : `https://sda.pu.go.id/balai/bbwssumatera8/api/uploads/berita/${imagePath}`,
         excerpt,
         date: item.created_at || item.tanggal || ''
       });
@@ -88,8 +93,14 @@ export async function updateBBWS8Cache(): Promise<void> {
   try {
     console.log('[BBWS8 API] Fetching data terbaru (page=0&sort=newest)...');
     const data = await fetchBBWS8BeritaFromAPI();
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    const tmpFile = `${DATA_FILE}.tmp`;
+    await fs.writeFile(tmpFile, JSON.stringify(data, null, 2), 'utf-8');
+    await fs.rename(tmpFile, DATA_FILE);
     cache.set(CACHE_KEY, data);
-    console.log(`[BBWS8 API] Cache diperbarui: ${data.lastUpdated} (${data.berita.length} berita)`);
+    console.log(
+      `[BBWS8 API] Cache dan ${DATA_FILE} diperbarui: ${data.lastUpdated} (${data.berita.length} berita)`
+    );
   } catch (error: any) {
     console.error('[BBWS8 API] Error updating cache:', error.message);
   }

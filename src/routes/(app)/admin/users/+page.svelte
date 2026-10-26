@@ -4,13 +4,13 @@
     let { data, form }: { data: PageData; form: ActionData } = $props();
 
     // State modal & form
-    let selectedUser = $state<{ id: string; username: string } | null>(null);
+    let selectedUser = $state<{ id: number; username: string } | null>(null);
     let newPassword = $state('');
     let isPasswordValid = $derived(newPassword.length >= 4);
 
     let modalRef = $state<HTMLDialogElement | null>(null);
 
-    function openSetPasswordModal(user: { id: string; username: string }) {
+    function openSetPasswordModal(user: { id: number; username: string }) {
         selectedUser = user;
         newPassword = '';
         modalRef?.showModal();
@@ -52,7 +52,7 @@
                 </tr>
             </thead>
             <tbody>
-                {#each data.users as u}
+                {#each data.users as u (u.id)}
                     <tr class="hover">
                         <td class="font-bold">{u.username}</td>
                         <td>

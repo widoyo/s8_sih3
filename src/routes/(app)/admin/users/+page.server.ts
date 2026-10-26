@@ -43,11 +43,18 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const targetUserId = formData.get('userId')?.toString();
+		const targetUserIdRaw = formData.get('userId')?.toString();
+		const targetUserId = Number(targetUserIdRaw);
 		const newPassword = formData.get('newPassword')?.toString();
 
 		// Validasi Input
-		if (!targetUserId || !newPassword || newPassword.length < 4) {
+		if (
+			!targetUserIdRaw ||
+			!Number.isSafeInteger(targetUserId) ||
+			targetUserId <= 0 ||
+			!newPassword ||
+			newPassword.length < 4
+		) {
 			return fail(400, {
 				success: false,
 				message: 'ID User valid dan password minimal 4 karakter wajib diisi.'
@@ -55,7 +62,7 @@ export const actions: Actions = {
 		}
 
 		// Batasan Akses: Hanya SUPER_ADMIN atau pemilik akun sendiri yang bisa ubah password
-		if (locals.user.role !== 'SUPER_ADMIN' && locals.user.id !== targetUserId) {
+		if (locals.user.role !== 'SUPER_ADMIN' && Number(locals.user.id) !== targetUserId) {
 			return fail(403, {
 				success: false,
 				message: 'Anda tidak memiliki hak akses untuk mengubah password user ini.'
@@ -79,7 +86,7 @@ export const actions: Actions = {
 
 		// Catat Log Aktivitas
 		await db.insert(userLogs).values({
-			userId: locals.user.id,
+			userId: String(locals.user.id),
 			action: 'CHANGE_PASSWORD',
 			details: `Reset password untuk user #${targetUserId} (${updated[0].username}) oleh ${locals.user.username}`,
 			ipAddress: getClientAddress()

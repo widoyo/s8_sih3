@@ -1,13 +1,14 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { env } from '$env/dynamic/private';
 
 // Konfigurasi Lokasi File JSON
 const DATA_DIR = path.resolve(process.cwd(), 'data');
 const DATA_FILE = path.join(DATA_DIR, 'berita_bbwss8.json');
 
 // Secret Key untuk Keamanan (Set via .env di VPS atau gunakan default fallback)
-const SECRET_KEY = process.env.WEBHOOK_SECRET_KEY || 'sih3-bbwss8-secret-key-123';
+const SECRET_KEY = env.WEBHOOK_SECRET_KEY;
 
 export interface BeritaItem {
   id?: string | number;
@@ -45,7 +46,7 @@ export const POST: RequestHandler = async ({ request }) => {
     rawItems.forEach((item: any) => {
       const title = item.judul || item.title || '';
       const slug = item.slug || item.id || '';
-      const imagePath = item.gambar || item.image || item.foto || '';
+      const imagePath = item.gambar || item.img || item.foto || '';
       const rawExcerpt = item.ringkasan || item.excerpt || item.deskripsi || '';
 
       // Bersihkan tag HTML dari ringkasan

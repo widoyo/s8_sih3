@@ -10,6 +10,7 @@
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"test:200": "node scripts/test-200.js",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"scrape": "tsx src/lib/server/bmkgService.ts",
@@ -31,6 +32,7 @@
 		"@tailwindcss/vite": "^4.3.3",
 		"@types/better-sqlite3": "^7.6.13",
 		"@types/node": "^22",
+		"@types/shpjs": "^3.4.7",
 		"dotenv": "^17.4.2",
 		"drizzle-kit": "^0.31.10",
 		"drizzle-orm": "^0.45.2",
@@ -56,6 +58,7 @@
 		"better-sqlite3": "^13.0.2",
 		"daisyui": "^5.7.16",
 		"leaflet": "^1.9.4",
-		"linkedom": "^0.18.13"
+		"linkedom": "^0.18.13",
+		"shpjs": "^6.2.0"
 	}
 }

@@ -1,16 +1,41 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import { parseHTML } from 'linkedom';
 
+interface BMKGData {
+  peringatanIklim: Array<{
+    title: string;
+    description: string;
+    link: string;
+    image: string;
+  }>;
+  peringatanCuaca: {
+    status: string;
+    text: string;
+    icon: string;
+  };
+  kegiatanTerkini: Array<{
+    title: string;
+    link: string;
+    image: string;
+    isFeatured: boolean;
+  }>;
+  lastUpdated: string;
+}
+
 // Storage in-memory menggunakan Map
-const cache = new Map();
+const cache = new Map<string, BMKGData>();
 const CACHE_KEY = 'bmkg_data';
 const UPDATE_INTERVAL_MS = 15 * 60 * 1000; // Update setiap 15 menit (sesuaikan kebutuhan)
+const DATA_DIR = path.resolve(process.cwd(), 'data');
+const DATA_FILE = path.join(DATA_DIR, 'staklimsumsel.json');
 
 let isTimerStarted = false;
 
 /**
  * Fungsi utama scraper menggunakan linkedom
  */
-async function scrapeBMKGSumsel() {
+async function scrapeBMKGSumsel(): Promise<BMKGData> {
   const TARGET_URL = 'https://staklim-sumsel.bmkg.go.id/';
 
   const response = await fetch(TARGET_URL, {
@@ -28,7 +53,7 @@ async function scrapeBMKGSumsel() {
   const { document } = parseHTML(htmlText);
 
   // 1. EXTRACTION: Peringatan Dini Iklim
-  const peringatanIklim = [];
+  const peringatanIklim: BMKGData['peringatanIklim'] = [];
   document.querySelectorAll('.bmkg-widget .item-slide').forEach((el) => {
     const title = el.querySelector('.text-content h3')?.textContent.trim() || '';
     const description = el.querySelector('.article-desc-text')?.textContent.trim() || '';
@@ -56,7 +81,7 @@ async function scrapeBMKGSumsel() {
   }
 
   // 3. EXTRACTION: Kegiatan Terkini
-  const kegiatanTerkini = [];
+  const kegiatanTerkini: BMKGData['kegiatanTerkini'] = [];
   const bigThumb = document.querySelector('#bmkg-news-section-unique .news-big-thumb');
   if (bigThumb) {
     const title = bigThumb.querySelector('.news-title-text')?.textContent.trim() || '';
@@ -88,10 +113,19 @@ export async function updateBMKGCache() {
   try {
     console.log('[BMKG Scraper] Mengambil data terbaru...');
     const data = await scrapeBMKGSumsel();
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    const tmpFile = `${DATA_FILE}.tmp`;
+    await fs.writeFile(tmpFile, JSON.stringify(data, null, 2), 'utf-8');
+    await fs.rename(tmpFile, DATA_FILE);
     cache.set(CACHE_KEY, data);
-    console.log(`[BMKG Scraper] Cache berhasil di-update pada: ${data.lastUpdated}`);
+    console.log(
+      `[BMKG Scraper] Cache dan ${DATA_FILE} berhasil di-update pada: ${data.lastUpdated}`
+    );
   } catch (error) {
-    console.error('[BMKG Scraper] Gagal memperbarui cache:', error.message);
+    console.error(
+      '[BMKG Scraper] Gagal memperbarui cache dan file:',
+      error instanceof Error ? error.message : error
+    );
   }
 }
 

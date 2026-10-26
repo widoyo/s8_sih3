@@ -38,7 +38,7 @@ export const actions: Actions = {
 		const formData = await request.formData();
 		const idStr = formData.get('id')?.toString();
 		const nama = formData.get('nama')?.toString().trim();
-		const deskripsi = formData.get('deskripsi')?.toString().trim() || null;
+		const alamat = formData.get('deskripsi')?.toString().trim() || null;
 
 		const id = idStr ? parseInt(idStr, 10) : null;
 
@@ -52,7 +52,7 @@ export const actions: Actions = {
 		// Update di database
 		const updated = await db
 			.update(lembagas)
-			.set({ nama, deskripsi })
+			.set({ nama, alamat })
 			.where(eq(lembagas.id, id))
 			.returning({ id: lembagas.id, nama: lembagas.nama });
 
@@ -65,7 +65,7 @@ export const actions: Actions = {
 
 		// Catat Log Aktivitas
 		await db.insert(userLogs).values({
-			userId: locals.user.id,
+			userId: String(locals.user.id),
 			action: 'UPDATE_LEMBAGA',
 			details: `Memperbarui data lembaga #${id} (${updated[0].nama})`,
 			ipAddress: getClientAddress()

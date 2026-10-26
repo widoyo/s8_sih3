@@ -29,7 +29,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		.leftJoin(lembagas, eq(posHidrologi.lembagaId, lembagas.id))
 		.leftJoin(das, eq(posHidrologi.dasId, das.id))
 		.orderBy(desc(posHidrologi.id));
-	
+
 	console.log('Pos Length: ', posList.length);
 	const refLembaga = await db.select({ id: lembagas.id, nama: lembagas.nama }).from(lembagas);
 	const refDas = await db.select({ id: das.id, nama: das.nama }).from(das);
@@ -75,7 +75,7 @@ export const actions: Actions = {
 			elevasi: elevasiStr ? parseFloat(elevasiStr) : null,
 			alertStatus: status,
 			lembagaId: lembagaIdStr ? parseInt(lembagaIdStr, 10) : null,
-			dasId: dasIdStr ? parseInt(dasIdStr, 10) : null
+			dasId: dasIdStr || null
 		};
 
 		if (idStr) {
@@ -84,7 +84,7 @@ export const actions: Actions = {
 			await db.update(posHidrologi).set(payload).where(eq(posHidrologi.id, id));
 
 			await db.insert(userLogs).values({
-				userId: locals.user.id,
+				userId: String(locals.user.id),
 				action: 'UPDATE_POS',
 				details: `Memperbarui pos hidrologi #${id} (${nama})`,
 				ipAddress: getClientAddress()
@@ -93,10 +93,13 @@ export const actions: Actions = {
 			return { success: true, message: `Pos "${nama}" berhasil diperbarui.` };
 		} else {
 			// Create Pos Baru
-			const inserted = await db.insert(posHidrologi).values(payload).returning({ id: posHidrologi.id });
+			const inserted = await db
+				.insert(posHidrologi)
+				.values(payload)
+				.returning({ id: posHidrologi.id });
 
 			await db.insert(userLogs).values({
-				userId: locals.user.id,
+				userId: String(locals.user.id),
 				action: 'CREATE_POS',
 				details: `Menambahkan pos hidrologi baru #${inserted[0].id} (${nama})`,
 				ipAddress: getClientAddress()

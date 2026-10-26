@@ -4,17 +4,17 @@
     let { data, form }: { data: PageData; form: ActionData } = $props();
 
     // State untuk Modal Edit
-    let selectedLembaga = $state<{ id: number; nama: string; deskripsi: string | null } | null>(null);
+    let selectedLembaga = $state<{ id: number; nama: string; alamat: string | null } | null>(null);
     let editNama = $state('');
     let editDeskripsi = $state('');
 
     let isFormValid = $derived(editNama.trim().length >= 2);
     let modalRef = $state<HTMLDialogElement | null>(null);
 
-    function openEditModal(lembaga: { id: number; nama: string; deskripsi: string | null }) {
+    function openEditModal(lembaga: { id: number; nama: string; alamat: string | null }) {
         selectedLembaga = lembaga;
         editNama = lembaga.nama;
-        editDeskripsi = lembaga.deskripsi || '';
+        editDeskripsi = lembaga.alamat || '';
         modalRef?.showModal();
     }
 
@@ -54,11 +54,11 @@
                 </tr>
             </thead>
             <tbody>
-                {#each data.lembagas as l}
+                {#each data.lembagas as l (l.id)}
                     <tr class="hover">
                         <td class="font-mono text-xs font-bold opacity-60">#{l.id}</td>
                         <td class="font-bold">{l.nama}</td>
-                        <td class="text-xs text-base-content/70">{l.deskripsi || '-'}</td>
+                        <td class="text-xs text-base-content/70">{l.alamat || '-'}</td>
                         <td class="text-right">
                             <button 
                                 type="button" 

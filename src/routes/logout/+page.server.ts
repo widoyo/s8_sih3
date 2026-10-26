@@ -1,4 +1,4 @@
-import { redirect, fail } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { invalidateSession } from '$lib/server/auth';
 import { db } from '$lib/server/db';
@@ -12,7 +12,7 @@ export const actions: Actions = {
 			// 1. Catat log logout jika user terautentikasi
 			if (locals.user) {
 				await db.insert(userLogs).values({
-					userId: locals.user.id,
+					userId: String(locals.user.id),
 					action: 'LOGOUT',
 					details: 'User melakukan logout',
 					ipAddress: getClientAddress()

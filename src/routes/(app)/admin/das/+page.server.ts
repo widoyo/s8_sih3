@@ -87,7 +87,7 @@ export const actions: Actions = {
 			}
 
 			await db.insert(userLogs).values({
-				userId: locals.user.id,
+				userId: String(locals.user.id),
 				action: 'UPDATE_DAS',
 				details: `Memperbarui data DAS #${id} (${nama})`,
 				ipAddress: getClientAddress()
@@ -99,7 +99,7 @@ export const actions: Actions = {
 			const inserted = await db.insert(das).values(payload).returning({ id: das.id });
 
 			await db.insert(userLogs).values({
-				userId: locals.user.id,
+				userId: String(locals.user.id),
 				action: 'CREATE_DAS',
 				details: `Menambahkan DAS baru #${inserted[0].id} (${nama})`,
 				ipAddress: getClientAddress()

@@ -40,11 +40,7 @@ export const actions: Actions = {
 		}
 
 		// 2. Cari User di Database
-		const user = await db
-			.select()
-			.from(users)
-			.where(eq(users.username, username))
-			.get();
+		const user = await db.select().from(users).where(eq(users.username, username)).get();
 
 		if (!user) {
 			return fail(400, {
@@ -54,7 +50,8 @@ export const actions: Actions = {
 		}
 
 		// 3. Verifikasi Password
-		const isValidPassword = verifyPassword(password, user.passwordHash);
+		const isValidPassword =
+			user.passwordHash !== null && verifyPassword(password, user.passwordHash);
 		if (!isValidPassword) {
 			return fail(400, {
 				invalid: true,
@@ -79,7 +76,7 @@ export const actions: Actions = {
 		await db.update(users).set({ lastLogin: now }).where(eq(users.id, user.id));
 
 		await db.insert(userLogs).values({
-			userId: user.id,
+			userId: String(user.id),
 			action: 'LOGIN',
 			details: `Login berhasil sebagai ${user.role}`,
 			ipAddress: getClientAddress()

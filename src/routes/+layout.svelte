@@ -5,8 +5,7 @@
 	let { children } = $props();
 
 	onMount(() => {
-		const savedTheme = localStorage.getItem('sih3_theme') ?? 'emerald';
-		document.documentElement.setAttribute('data-theme', savedTheme);
+		document.documentElement.setAttribute('data-theme', 'light');
 	});
 </script>
 

@@ -39,9 +39,9 @@ export async function validateSession(sessionId: string) {
 }
 
 // Membuat Session Baru (saat Login berhasil)
-export async function createSession(userId: string) {
+export async function createSession(userId: number) {
 	const sessionId = randomBytes(32).toString('hex');
-	
+
 	// Set kedaluwarsa 30 hari dari sekarang
 	const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
 
