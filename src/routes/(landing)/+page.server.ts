@@ -1,7 +1,10 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { getAtabToken } from '$lib/server/api/atab'
 import type { BBWS8Cache } from '$lib/server/bbwss8Service';
 import type { PageServerLoad } from './$types';
+import { parseDashboardResponse } from '$lib/index';
+
 
 interface CombinedNewsItem {
 	source: 'BMKG Sumsel' | 'BBWSS8';
@@ -120,9 +123,44 @@ export const load: PageServerLoad = async () => {
 		return dateB - dateA;
 	});
 
+	let groupedStations = { arr: [] as any[], awlr: [] as any[], aws: [] as any[] };
+	let hydroStats = { total: 0, normal: 0, warning: 0, anomali: 0, maintenance: 0 };
+
+	try {
+		const token = await getAtabToken();
+		
+		// Single request ke endpoint dashboard yang sudah difilter oleh backend berdasarkan balai user
+		const res = await fetch('https://atab-api.blitztechnology.tech/dashboard/', {
+			headers: { Authorization: `Bearer ${token}` }
+		});
+
+		if (res.ok) {
+			const responseData = await res.json();
+			const processedStations = parseDashboardResponse(responseData);
+
+			groupedStations = {
+				arr: processedStations.filter(s => s.station_type === 1),
+				awlr: processedStations.filter(s => s.station_type === 2),
+				aws: processedStations.filter(s => s.station_type === 3)
+			};
+
+			hydroStats = {
+				total: processedStations.length,
+				normal: processedStations.filter(s => s.validation.status === 'NORMAL').length,
+				warning: processedStations.filter(s => s.validation.status === 'WARNING').length,
+				anomali: processedStations.filter(s => s.validation.status === 'ANOMALI').length,
+				maintenance: processedStations.filter(s => s.validation.status === 'MAINTENANCE').length
+			};
+		}
+	} catch (err) {
+		console.error('Gagal memproses data dashboard ATAB:', err);
+	}
+
 	return {
 		prakiraanData,
 		beritaGabungan,
-		peringatanIklim
+		peringatanIklim,
+		groupedStations,
+		hydroStats
 	};
 };

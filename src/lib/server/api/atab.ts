@@ -184,5 +184,5 @@ export async function getAtabDashboard(): Promise<any> {
 	} catch (err) {
 		console.error('Failed to fetch ATAB dashboard data:', err);
 		return null;
-	}
+	} 
 }

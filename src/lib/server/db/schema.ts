@@ -86,7 +86,7 @@ export const posHidrologi = sqliteTable('pos_hidrologi', {
 	kode: text('code'), // kode unik oleh pengelola 
 	nama: text('nama').notNull(),
 	tipe: text('tipe').notNull(), // 'TMA' | 'CH' | 'BENDUNGAN'
-	dasId: text('das_id').references(() => das.id),
+	dasId: integer('das_id').references(() => das.id),
 	sungai: text('sungai'),
 	desa: text('desa'),
 	kecamatan: text('kecamatan'),

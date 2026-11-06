@@ -176,7 +176,7 @@
 					class="flex items-center gap-3 rounded-lg px-6 py-2 text-base hover:bg-base-200"
 				>
 					<Contact class="size-5 text-success" />
-					<span>Nara Hubung</span>
+					<span>Sekretariat</span>
 				</a>
 			</div>
 		</div>
