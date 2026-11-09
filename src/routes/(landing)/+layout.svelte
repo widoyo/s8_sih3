@@ -62,6 +62,14 @@
 				<span>Hidrogeologi</span>
 			</a>
 
+			<a
+				href={resolve('/peta-gis')}
+				class="btn gap-2 btn-ghost text-base font-normal btn-sm"
+			>
+				<Droplets class="size-4 text-blue-600" />
+				<span>Peta GIS</span>
+			</a>
+
 			<!-- About page, dropdown  -->
 			<div class="dropdown dropdown-hover">
 				<button type="button" class="btn gap-2 btn-ghost text-base font-normal btn-sm">
@@ -72,7 +80,7 @@
 					<li class="border-b border-base-300 pb-1">
 						<a href={resolve('/about')} class="gap-3 py-3">
 							<Info class="size-4 text-primary" />
-							<span>Kami</span>
+							<span>Portal SIH3 MSBL</span>
 						</a>
 					</li>
 					<li class="border-b border-base-300 py-1">
@@ -160,7 +168,7 @@
 					class="flex items-center gap-3 rounded-lg px-6 py-2 text-base hover:bg-base-200"
 				>
 					<Info class="size-5 text-primary" />
-					<span>Kami</span>
+					<span>Portal SIH3 MSBL</span>
 				</a>
 				<a
 					href={resolve('/about/lembaga')}

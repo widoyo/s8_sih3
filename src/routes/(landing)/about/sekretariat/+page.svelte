@@ -36,12 +36,12 @@
 					</p>
 				</div>
 				<a
-					href="tel:+62711352222"
+					href="tel:+628117887443"
 					class="btn w-fit gap-2 btn-primary"
-					aria-label="Telepon sekretariat di (0711) 352 222"
+					aria-label="Telepon sekretariat di +628117887443"
 				>
 					<Phone class="size-4" aria-hidden="true" />
-					(0711) 352 222
+					+62 811 788 7443
 				</a>
 			</div>
 		</article>
@@ -58,8 +58,8 @@
 					<div class="space-y-1">
 						<h3 class="font-semibold">Alamat</h3>
 						<address class="text-sm leading-relaxed text-base-content/70 not-italic">
-							Jl. Kol. H. Burlian No. 1, Bukit Sangkal, Kec. Ilir Barat I, Kota Palembang, Sumatera
-							Selatan 30129
+							Jl. Soekarno Hatta no 869 Kec. Alang-alang Lebar, Kota Palembang, Sumatera
+							Selatan 30114
 						</address>
 					</div>
 				</div>
@@ -71,8 +71,8 @@
 					</div>
 					<div class="space-y-1">
 						<h3 class="font-semibold">Telepon</h3>
-						<a href="tel:+62711352222" class="link text-sm text-base-content/70 link-hover">
-							(0711) 352 222
+						<a href="tel:+628117887443" class="link text-sm text-base-content/70 link-hover">
+							+62 811 788 7443
 						</a>
 					</div>
 				</div>

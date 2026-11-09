@@ -63,7 +63,7 @@
 		<div class="mb-8 max-w-2xl text-center text-base-content">
 			<h1 class="mb-4 text-4xl font-extrabold tracking-tight drop-shadow-lg md:text-5xl">SIH3 MSBL</h1>
 			<p class="text-sm leading-relaxed font-medium text-base-content/50 drop-shadow-md md:text-base">
-				Sistem Informasi Hidro Meteorologi, Hidrologi, & HidroGeologi Wilayah Sungai Musi Sugihan Banyuasin Lemau (WS MSBL)
+				Sistem Informasi Hidro Meteorologi, Hidrologi, & HidroGeologi<br /> Wilayah Sungai Musi Sugihan Banyuasin Lemau (WS MSBL)
 			</p>
 			<div class="mt-6">&nbsp;</div>
 		</div>
@@ -251,7 +251,7 @@
 			</button>
 			{#each hydroSections as section (section.key)}
 				<button class="btn btn-sm {activeHydroTab === section.key ? 'btn-primary' : 'btn-ghost'}" onclick={() => activeHydroTab = section.key}>
-					{section.title.split(' ')[1]} ({section.data.length})
+					{section.title} ({section.data.length})
 				</button>
 			{/each}
 		</div>
