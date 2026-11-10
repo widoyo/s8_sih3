@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';
-	import { House, Wind, Waves, Droplets, Menu, X, Info, Building2, Contact } from '@lucide/svelte';
+	import { House, Wind, Waves, Droplets, Menu, X, Building2, Boxes, Info, Map, Contact } from '@lucide/svelte';
 
 	let { children } = $props();
 
@@ -66,7 +66,7 @@
 				href={resolve('/peta-gis')}
 				class="btn gap-2 btn-ghost text-base font-normal btn-sm"
 			>
-				<Droplets class="size-4 text-blue-600" />
+				<Map class="size-4 text-blue-600" />
 				<span>Peta GIS</span>
 			</a>
 
@@ -79,7 +79,7 @@
 				<ul class="menu dropdown-content z-[1] w-56 rounded-box bg-base-100 p-2 text-base shadow">
 					<li class="border-b border-base-300 pb-1">
 						<a href={resolve('/about')} class="gap-3 py-3">
-							<Info class="size-4 text-primary" />
+							<Boxes class="size-4 text-primary" />
 							<span>Portal SIH3 MSBL</span>
 						</a>
 					</li>
@@ -157,6 +157,14 @@
 				<span>Hidrogeologi</span>
 			</a>
 
+			<a
+				href={resolve('/peta-gis')}
+				onclick={closeMobileMenu}
+				class="flex items-center gap-3 rounded-lg px-3 py-2 text-base hover:bg-base-200"
+			>
+				<Map class="size-5 text-blue-600" />
+				<span>Peta GIS</span>
+			</a>
 			<div class="border-t border-base-200 pt-2">
 				<p class="flex items-center gap-3 px-3 py-2 text-sm font-semibold text-base-content/70">
 					<Info class="size-5 text-primary" />
@@ -167,7 +175,7 @@
 					onclick={closeMobileMenu}
 					class="flex items-center gap-3 rounded-lg px-6 py-2 text-base hover:bg-base-200"
 				>
-					<Info class="size-5 text-primary" />
+					<Boxes class="size-5 text-primary" />
 					<span>Portal SIH3 MSBL</span>
 				</a>
 				<a
@@ -193,3 +201,17 @@
 <main class="mx-auto w-full max-w-screen-xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
 	{@render children()}
 </main>
+<!-- Footer Selebar Header -->
+    <footer class="w-full border-t border-base-200 bg-base-200/60 text-base-content">
+        <div class="flex w-full flex-col items-center justify-between gap-4 px-4 py-6 sm:flex-row sm:px-6 lg:px-8">
+            <div class="flex items-center gap-2 text-sm font-medium">
+                <Boxes class="size-5 text-primary" />
+                <span>SIH3 MSBL &copy; {new Date().getFullYear()} — Sistem Informasi Hidrometeorologi, Hidrologi, dan Hidrogeologi</span>
+            </div>
+            <div class="flex items-center gap-4 text-sm font-normal text-base-content/70">
+                <a href={resolve('/about')} class="hover:text-primary transition-colors">Tentang</a>
+                <a href={resolve('/about/sekretariat')} class="hover:text-primary transition-colors">Sekretariat</a>
+                <a href={resolve('/peta-gis')} class="hover:text-primary transition-colors">Peta GIS</a>
+            </div>
+        </div>
+    </footer>

@@ -23,8 +23,9 @@ export default defineConfig({
 					config.include.push('../drizzle.config.ts');
 				}
 			}
-		})
+		}),		
 	],
+	assetsInclude: ['**/*.zip'],
 	ssr: {
     // Memaksa Vite memproses komponen .svelte milik Lucide saat SSR
     noExternal: ['@lucide/svelte']

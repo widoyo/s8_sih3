@@ -1,13 +1,13 @@
 import { error, json, type RequestHandler } from '@sveltejs/kit';
-import fs from 'node:fs/promises';
-import path from 'node:path';
+import catZipUrl from '$lib/assets/cat.zip?url';
 import shp from 'shpjs';
 
 let catData: Promise<GeoJSON.FeatureCollection> | undefined;
 
-async function loadCatData(): Promise<GeoJSON.FeatureCollection> {
-	const archivePath = path.resolve(process.cwd(), 'static', 'cat.zip');
-	const parsed = await shp(await fs.readFile(archivePath));
+async function loadCatData(customFetch: typeof fetch = fetch): Promise<GeoJSON.FeatureCollection> {
+	const response = await customFetch(catZipUrl);
+    const buffer = await response.arrayBuffer();
+	const parsed = await shp(buffer);
 
 	if (Array.isArray(parsed)) {
 		throw new Error('Arsip CAT harus berisi satu shapefile.');
@@ -16,9 +16,9 @@ async function loadCatData(): Promise<GeoJSON.FeatureCollection> {
 	return parsed;
 }
 
-export const GET: RequestHandler = async () => {
+export const GET: RequestHandler = async ({fetch}) => {
 	try {
-		catData ??= loadCatData();
+		catData ??= loadCatData(fetch);
 		return json(await catData, {
 			headers: { 'Cache-Control': 'public, max-age=3600' }
 		});
