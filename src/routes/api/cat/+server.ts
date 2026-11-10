@@ -6,7 +6,7 @@ import shp from 'shpjs';
 let catData: Promise<GeoJSON.FeatureCollection> | undefined;
 
 async function loadCatData(): Promise<GeoJSON.FeatureCollection> {
-	const archivePath = path.resolve(process.cwd(), 'cat.zip');
+	const archivePath = path.resolve(process.cwd(), 'static', 'cat.zip');
 	const parsed = await shp(await fs.readFile(archivePath));
 
 	if (Array.isArray(parsed)) {
