@@ -91,6 +91,26 @@
 						</a>
 					</li>
 					<li>
+						<a href={resolve('/admin/scraper-logs')} class="gap-3">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="size-5 shrink-0"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+								aria-hidden="true"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="1.8"
+									d="M4 19V5m0 14h17M7 15l4-4 3 2 5-6"
+								/>
+							</svg>
+							<span>Aktifitas Scraper</span>
+						</a>
+					</li>
+					<li>
 						<a href={resolve('/admin/logs')} class="gap-3">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"

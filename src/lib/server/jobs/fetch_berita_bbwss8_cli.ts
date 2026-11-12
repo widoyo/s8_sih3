@@ -1,9 +1,13 @@
+import 'dotenv/config';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+// Gunakan relative path agar kompatibel saat dieksekusi via tsx CLI
+import { logScraperExecution } from '../services/scraperLogService';
 
 const API_URL = 'https://sda.pu.go.id/balai/bbwssumatera8/api/berita?page=0&sort=newest';
 const DATA_DIR = path.resolve(process.cwd(), 'data');
 const DATA_FILE = path.join(DATA_DIR, 'berita_bbwss8.json');
+const SCRAPER_SOURCE = 'BERITA_BBWSS8';
 
 export interface BeritaItem {
   id?: string | number;
@@ -46,7 +50,7 @@ async function fetchAndSaveBerita(): Promise<void> {
       const imagePath = item.gambar || item.image || item.foto || '';
       const rawExcerpt = item.ringkasan || item.excerpt || item.deskripsi || '';
 
-      // Clean HTML tags[cite: 1]
+      // Clean HTML tags
       const excerpt = rawExcerpt.replace(/<[^>]*>?/gm, '').trim();
 
       if (title) {
@@ -62,7 +66,7 @@ async function fetchAndSaveBerita(): Promise<void> {
             ? `https://sda.pu.go.id/balai/bbwssumatera8/uploads/berita/${imagePath}`
             : '',
           excerpt,
-          date: item.created_at || item.tanggal || ''
+          date: item.createdAt || item.tanggal || ''
         });
       }
     });
@@ -72,17 +76,36 @@ async function fetchAndSaveBerita(): Promise<void> {
       lastUpdated: new Date().toISOString()
     };
 
-    // Pastikan folder data/ ada[cite: 1]
+    // Pastikan folder data/ ada
     await fs.mkdir(DATA_DIR, { recursive: true });
 
-    // Atomic file writing[cite: 1]
+    // Atomic file writing
     const tmpFile = `${DATA_FILE}.tmp`;
     await fs.writeFile(tmpFile, JSON.stringify(payload, null, 2), 'utf-8');
     await fs.rename(tmpFile, DATA_FILE);
 
     console.log(`✅ Berhasil memperbarui ${DATA_FILE} (${beritaList.length} berita)`);
+
+    // Catat log eksekusi SUKSES ke database
+    await logScraperExecution({
+      source: SCRAPER_SOURCE,
+      status: 'SUCCESS',
+      itemsScraped: beritaList.length
+    });
+
+    process.exit(0);
   } catch (err: any) {
     console.error(`❌ Gagal fetching data berita:`, err.message);
+
+    // Catat log eksekusi GAGAL ke database
+    await logScraperExecution({
+      source: SCRAPER_SOURCE,
+      status: 'FAILED',
+      itemsScraped: 0,
+      errorMessage: err.message || 'Unknown error'
+    });
+
+    process.exit(1);
   }
 }
 

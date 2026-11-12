@@ -44,7 +44,8 @@
 			lon = '';
 			elevasi = '';
 			status = 'AKTIF';
-			lembagaId = '';
+			// Set default lembagaId ke milik user jika ada
+			lembagaId = data.userLembagaId ? data.userLembagaId.toString() : '';
 			dasId = '';
 		}
 		modalRef?.showModal();
@@ -298,20 +299,25 @@
 					</select>
 				</div>
 				<div class="form-control">
-					<label class="label p-1" for="lembagaId"
-						><span class="label-text text-xs">Lembaga</span></label
-					>
+					<label class="label p-1" for="lembagaId">
+						<span class="label-text text-xs">Lembaga</span>
+					</label>
 					<select
 						id="lembagaId"
 						name="lembagaId"
 						class="select-bordered select select-sm"
 						bind:value={lembagaId}
+						disabled={!!data.userLembagaId}
 					>
 						<option value="">-- Pilih Lembaga --</option>
 						{#each data.refLembaga as l (l.id)}
 							<option value={l.id}>{l.nama}</option>
 						{/each}
 					</select>
+					{#if data.userLembagaId}
+						<!-- Input hidden dikirim jika select di-disabled -->
+						<input type="hidden" name="lembagaId" value={data.userLembagaId} />
+					{/if}
 				</div>
 			</div>
 

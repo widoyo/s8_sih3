@@ -1,4 +1,5 @@
 import { integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { sql } from 'drizzle-orm';
 
 
 export const lembagas = sqliteTable('lembagas', {
@@ -138,5 +139,11 @@ export const scraperLogs = sqliteTable('scraper_logs', {
 	status: text('status').notNull(), // 'SUCCESS' | 'WARNING' | 'FAILED'
 	itemsScraped: integer('items_scraped').default(0),
 	errorMessage: text('error_message'),
-	executedAt: text('executed_at').notNull()
+	executedAt: text('executed_at')
+		.default(sql`(CURRENT_TIMESTAMP)`)
+		.notNull()
 });
+
+export type ScraperLog = typeof scraperLogs.$inferSelect;
+export type NewScraperLog = typeof scraperLogs.$inferInsert;
+

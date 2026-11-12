@@ -1,5 +1,13 @@
+import 'dotenv/config';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+// Gunakan relative path agar kompatibel saat dieksekusi via tsx CLI
+import { logScraperExecution } from './services/scraperLogService';
+
+const API_URL = 'https://sda.pu.go.id/balai/bbwssumatera8/api/berita?page=0&sort=newest';
+const DATA_DIR = path.resolve(process.cwd(), 'data');
+const DATA_FILE = path.join(DATA_DIR, 'berita_bbwss8.json');
+const SCRAPER_SOURCE = 'BERITA_BBWSS8';
 
 export interface BeritaItem {
   id?: string | number;
@@ -10,126 +18,95 @@ export interface BeritaItem {
   date?: string;
 }
 
-export interface BBWS8Cache {
+export interface BBWS8Payload {
   berita: BeritaItem[];
   lastUpdated: string;
 }
 
-// In-Memory Cache
-const cache = new Map<string, BBWS8Cache>();
-const CACHE_KEY = 'bbws8_berita';
-const UPDATE_INTERVAL_MS = 15 * 60 * 1000; // 15 menit
-const DATA_DIR = path.resolve(process.cwd(), 'data');
-const DATA_FILE = path.join(DATA_DIR, 'berita_bbwss8.json');
+async function fetchAndSaveBerita(): Promise<void> {
+  console.log(`[${new Date().toISOString()}] Mengambil data dari sda.pu.go.id...`);
 
-let isTimerStarted = false;
-
-/**
- * Fetch berita dari REST API BBWS Sumatera VIII dengan parameter query
- */
-export async function fetchBBWS8BeritaFromAPI(): Promise<BBWS8Cache> {
-  // Tambahkan parameter ?page=0&sort=newest pada endpoint API
-  const BASE_URL = 'https://sda.pu.go.id/balai/bbwssumatera8/api/berita';
-  const params = new URLSearchParams({
-    page: '0',
-    sort: 'newest'
-  });
-
-  const API_URL = `${BASE_URL}?${params.toString()}`;
-
-  const response = await fetch(API_URL, {
-    headers: {
-      'User-Agent':
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Accept': 'application/json'
-    }
-  });
-
-  if (!response.ok) {
-    throw new Error(`Gagal fetch API BBWS VIII: ${response.status} ${response.statusText}`);
-  }
-
-  const result = await response.json();
-  const beritaList: BeritaItem[] = [];
-
-  // Menyesuaikan struktur JSON dari API backend (Array biasa atau objek { data: [...] })
-  const rawItems = Array.isArray(result) ? result : result.data || result.items || [];
-
-  rawItems.forEach((item: any) => {
-    const title = item.judul || item.title || '';
-    const slug = item.slug || item.id || '';
-    const imagePath = item.gambar || item.img || item.foto || '';
-    const rawExcerpt = item.ringkasan || item.excerpt || item.deskripsi || '';
-
-    // Sanitisasi HTML/tag jika ada
-    const excerpt = rawExcerpt.replace(/<[^>]*>?/gm, '').trim();
-
-    if (title) {
-      beritaList.push({
-        id: item.id,
-        title,
-        link: slug
-          ? `https://sda.pu.go.id/balai/bbwssumatera8/berita/#detail?id=${slug}`
-          : 'https://sda.pu.go.id/balai/bbwssumatera8/berita',
-        image: imagePath.startsWith('http')
-          ? imagePath
-          : `https://sda.pu.go.id/balai/bbwssumatera8/api/uploads/berita/${imagePath}`,
-        excerpt,
-        date: item.created_at || item.tanggal || ''
-      });
-    }
-  });
-
-  return {
-    berita: beritaList,
-    lastUpdated: new Date().toISOString()
-  };
-}
-
-/**
- * Update cache Map di memory
- */
-export async function updateBBWS8Cache(): Promise<void> {
   try {
-    console.log('[BBWS8 API] Fetching data terbaru (page=0&sort=newest)...');
-    const data = await fetchBBWS8BeritaFromAPI();
+    const response = await fetch(API_URL, {
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP Error! status: ${response.status} ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    const rawItems = Array.isArray(result) ? result : result.data || result.items || [];
+
+    const beritaList: BeritaItem[] = [];
+
+    rawItems.forEach((item: any) => {
+      const title = item.judul || item.title || '';
+      const slug = item.slug || item.id || '';
+      const imagePath = item.gambar || item.image || item.foto || '';
+      const rawExcerpt = item.ringkasan || item.excerpt || item.deskripsi || '';
+
+      // Clean HTML tags
+      const excerpt = rawExcerpt.replace(/<[^>]*>?/gm, '').trim();
+
+      if (title) {
+        beritaList.push({
+          id: item.id,
+          title,
+          link: slug
+            ? `https://sda.pu.go.id/balai/bbwssumatera8/berita?id=${slug}#detail`
+            : 'https://sda.pu.go.id/balai/bbwssumatera8/berita',
+          image: imagePath.startsWith('http')
+            ? imagePath
+            : imagePath
+            ? `https://sda.pu.go.id/balai/bbwssumatera8/uploads/berita/${imagePath}`
+            : '',
+          excerpt,
+          date: item.createdAt || item.tanggal || ''
+        });
+      }
+    });
+
+    const payload: BBWS8Payload = {
+      berita: beritaList,
+      lastUpdated: new Date().toISOString()
+    };
+
+    // Pastikan folder data/ ada
     await fs.mkdir(DATA_DIR, { recursive: true });
+
+    // Atomic file writing
     const tmpFile = `${DATA_FILE}.tmp`;
-    await fs.writeFile(tmpFile, JSON.stringify(data, null, 2), 'utf-8');
+    await fs.writeFile(tmpFile, JSON.stringify(payload, null, 2), 'utf-8');
     await fs.rename(tmpFile, DATA_FILE);
-    cache.set(CACHE_KEY, data);
-    console.log(
-      `[BBWS8 API] Cache dan ${DATA_FILE} diperbarui: ${data.lastUpdated} (${data.berita.length} berita)`
-    );
-  } catch (error: any) {
-    console.error('[BBWS8 API] Error updating cache:', error.message);
+
+    console.log(`✅ Berhasil memperbarui ${DATA_FILE} (${beritaList.length} berita)`);
+
+    // Catat log eksekusi SUKSES ke database
+    await logScraperExecution({
+      source: SCRAPER_SOURCE,
+      status: 'SUCCESS',
+      itemsScraped: beritaList.length
+    });
+
+    process.exit(0);
+  } catch (err: any) {
+    console.error(`❌ Gagal fetching data berita:`, err.message);
+
+    // Catat log eksekusi GAGAL ke database
+    await logScraperExecution({
+      source: SCRAPER_SOURCE,
+      status: 'FAILED',
+      itemsScraped: 0,
+      errorMessage: err.message || 'Unknown error'
+    });
+
+    process.exit(1);
   }
 }
 
-/**
- * Inisialisasi pewaktu periodik
- */
-export function initBBWS8Cron(): void {
-  if (isTimerStarted) return;
-  isTimerStarted = true;
-
-  updateBBWS8Cache();
-  setInterval(() => {
-    updateBBWS8Cache();
-  }, UPDATE_INTERVAL_MS);
-}
-
-/**
- * Get data dari Memory Map
- */
-export function getBBWS8DataFromCache(): BBWS8Cache | null {
-  return cache.get(CACHE_KEY) || null;
-}
-
-// Testing via CLI (npm run fetch:bbws8)
-if (import.meta.url === `file://${process.argv[1]}`) {
-  console.log('--- Testing API Fetch BBWS VIII dengan Query Params ---');
-  updateBBWS8Cache().then(() => {
-    console.log('Data dari Memory Map:', JSON.stringify(getBBWS8DataFromCache(), null, 2));
-  });
-}
+fetchAndSaveBerita();

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';
-	import { House, Wind, Waves, Droplets, Menu, X, Building2, Boxes, Info, Map, Contact } from '@lucide/svelte';
+	import { House, Wind, Waves, Droplets, Menu, X, Building2, KeyRound, Boxes, Info, Map, Contact } from '@lucide/svelte';
 
 	let { children } = $props();
 
@@ -212,6 +212,7 @@
                 <a href={resolve('/about')} class="hover:text-primary transition-colors">Tentang</a>
                 <a href={resolve('/about/sekretariat')} class="hover:text-primary transition-colors">Sekretariat</a>
                 <a href={resolve('/peta-gis')} class="hover:text-primary transition-colors">Peta GIS</a>
+				<a href={resolve('/admin')} class="hover:text-primary transition-colors"><KeyRound class="size-4" /></a>
             </div>
         </div>
     </footer>

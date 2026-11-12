@@ -2,13 +2,15 @@ import { json, type RequestHandler } from '@sveltejs/kit';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { env } from '$env/dynamic/private';
+import { logScraperExecution } from '$lib/server/services/scraperLogService';
 
 // Konfigurasi Lokasi File JSON
 const DATA_DIR = path.resolve(process.cwd(), 'data');
 const DATA_FILE = path.join(DATA_DIR, 'berita_bbwss8.json');
 
-// Secret Key untuk Keamanan (Set via .env di VPS atau gunakan default fallback)
+// Secret Key untuk Keamanan
 const SECRET_KEY = env.WEBHOOK_SECRET_KEY;
+const SCRAPER_SOURCE = 'WEBHOOK_BBWSS8';
 
 export interface BeritaItem {
   id?: string | number;
@@ -29,6 +31,13 @@ export const POST: RequestHandler = async ({ request }) => {
     // 1. Verifikasi Header Keamanan
     const authHeader = request.headers.get('x-api-key');
     if (authHeader !== SECRET_KEY) {
+      await logScraperExecution({
+        source: SCRAPER_SOURCE,
+        status: 'FAILED',
+        itemsScraped: 0,
+        errorMessage: 'Akses ditolak: API Key tidak valid'
+      });
+
       return json(
         { success: false, error: 'Akses ditolak: API Key tidak valid' },
         { status: 401 }
@@ -83,6 +92,13 @@ export const POST: RequestHandler = async ({ request }) => {
 
     console.log(`[WEBHOOK BBWS8] Berhasil memperbarui data/berita_bbwss8.json (${beritaList.length} berita)`);
 
+    // 5. Catat riwayat SUKSES ke database scraper_logs
+    await logScraperExecution({
+      source: SCRAPER_SOURCE,
+      status: 'SUCCESS',
+      itemsScraped: beritaList.length
+    });
+
     return json({
       success: true,
       message: 'File berita_bbwss8.json berhasil diperbarui!',
@@ -91,6 +107,15 @@ export const POST: RequestHandler = async ({ request }) => {
     });
   } catch (err: any) {
     console.error('[WEBHOOK BBWS8 ERROR]:', err);
+
+    // Catat riwayat GAGAL ke database scraper_logs
+    await logScraperExecution({
+      source: SCRAPER_SOURCE,
+      status: 'FAILED',
+      itemsScraped: 0,
+      errorMessage: err.message || 'Unknown error'
+    });
+
     return json({ success: false, error: err.message }, { status: 400 });
   }
 };

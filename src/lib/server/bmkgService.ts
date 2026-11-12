@@ -2,6 +2,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { parseHTML } from 'linkedom';
 
+import { logScraperExecution } from '$lib/server/services/scraperLogService';
+
 interface BMKGData {
   peringatanIklim: Array<{
     title: string;
@@ -37,79 +39,126 @@ let isTimerStarted = false;
  */
 async function scrapeBMKGSumsel(): Promise<BMKGData> {
   const TARGET_URL = 'https://staklim-sumsel.bmkg.go.id/';
+  const SOURCE_NAME = 'BMKG_SUMSEL';
 
-  const response = await fetch(TARGET_URL, {
-    headers: {
-      'User-Agent':
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+  try {
+    const response = await fetch(TARGET_URL, {
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Gagal fetching BMKG: ${response.status} ${response.statusText}`);
     }
-  });
 
-  if (!response.ok) {
-    throw new Error(`Gagal fetching BMKG: ${response.statusText}`);
-  }
+    const htmlText = await response.text();
+    const { document } = parseHTML(htmlText);
 
-  const htmlText = await response.text();
-  const { document } = parseHTML(htmlText);
+    // 1. EXTRACTION: Peringatan Dini Iklim
+    const peringatanIklim: BMKGData['peringatanIklim'] = [];
+    const seenLinks = new Set<string>();
 
-  // 1. EXTRACTION: Peringatan Dini Iklim
-  const peringatanIklim: BMKGData['peringatanIklim'] = [];
-  document.querySelectorAll('.bmkg-widget .item-slide').forEach((el) => {
-    const title = el.querySelector('.text-content h3')?.textContent.trim() || '';
-    const description = el.querySelector('.article-desc-text')?.textContent.trim() || '';
-    const link = el.querySelector('a.selengkapnya')?.getAttribute('href') || '';
-    const image = el.querySelector('.thumb-box img')?.getAttribute('src') || '';
+    document.querySelectorAll('.bmkg-widget .item-slide:not(.cloned):not(.slick-cloned)').forEach((el) => {
+      const title = el.querySelector('.text-content h3')?.textContent.trim() || '';
+      const description = el.querySelector('.article-desc-text')?.textContent.trim() || '';
+      const link = el.querySelector('a.selengkapnya')?.getAttribute('href') || '';
+      const image = el.querySelector('.thumb-box img')?.getAttribute('src') || '';
 
-    if (title) {
-      peringatanIklim.push({ title, description, link, image });
+      if (title && link && !seenLinks.has(link)) {
+        seenLinks.add(link);
+        peringatanIklim.push({ title, description, link, image });
+      }
+    });
+
+    // 2. EXTRACTION: Peringatan Dini Cuaca
+    let peringatanCuaca = { status: '', text: '', icon: '' };
+    const cuacaContainer = document.querySelector('.bmkg-pdss-container');
+    if (cuacaContainer) {
+      const isNoWarning = cuacaContainer.classList.contains('bmkg-pdss-no-warning');
+      const text = cuacaContainer.querySelector('.bmkg-pdss-text')?.textContent.trim() || '';
+      const icon = cuacaContainer.querySelector('.bmkg-pdss-icon')?.getAttribute('src') || '';
+
+      peringatanCuaca = {
+        status: isNoWarning ? 'Aman / Tidak Ada Peringatan' : 'Peringatan Dini Aktif',
+        text,
+        icon
+      };
     }
-  });
 
-  // 2. EXTRACTION: Peringatan Dini Cuaca
-  let peringatanCuaca = { status: '', text: '', icon: '' };
-  const cuacaContainer = document.querySelector('.bmkg-pdss-container');
-  if (cuacaContainer) {
-    const isNoWarning = cuacaContainer.classList.contains('bmkg-pdss-no-warning');
-    const text = cuacaContainer.querySelector('.bmkg-pdss-text')?.textContent.trim() || '';
-    const icon = cuacaContainer.querySelector('.bmkg-pdss-icon')?.getAttribute('src') || '';
+    // 3. EXTRACTION: Kegiatan Terkini
+    const kegiatanTerkini: BMKGData['kegiatanTerkini'] = [];
+    const seenNewsLinks = new Set<string>();
 
-    peringatanCuaca = {
-      status: isNoWarning ? 'Aman / Tidak Ada Peringatan' : 'Peringatan Dini Aktif',
-      text,
-      icon
+    const bigThumb = document.querySelector('#bmkg-news-section-unique .news-big-thumb');
+    if (bigThumb) {
+      const title = bigThumb.querySelector('.news-title-text')?.textContent.trim() || '';
+      const link = bigThumb.getAttribute('href') || '';
+      const image = bigThumb.querySelector('img')?.getAttribute('src') || '';
+      if (title && link) {
+        seenNewsLinks.add(link);
+        kegiatanTerkini.push({ title, link, image, isFeatured: true });
+      }
+    }
+
+    document.querySelectorAll('#bmkg-news-section-unique .news-side-grid .news-small-item').forEach((el) => {
+      const title = el.querySelector('.news-title-text')?.textContent.trim() || '';
+      const link = el.getAttribute('href') || '';
+      const image = el.querySelector('img')?.getAttribute('src') || '';
+
+      if (title && link && !seenNewsLinks.has(link)) {
+        seenNewsLinks.add(link);
+        kegiatanTerkini.push({ title, link, image, isFeatured: false });
+      }
+    });
+
+    // Hitung total item yang berhasil ditarik
+    const totalItems =
+      peringatanIklim.length +
+      kegiatanTerkini.length +
+      (peringatanCuaca.text ? 1 : 0);
+
+    // LOG SUCCESS KE DATABASE
+    await logScraperExecution({
+      source: SOURCE_NAME,
+      status: 'SUCCESS',
+      itemsScraped: totalItems
+    });
+
+    console.log(`[BMKG Scraper] Data berhasil diambil & dicatat ke log DB pada: ${new Date().toISOString()}`);
+
+    return {
+      peringatanIklim,
+      peringatanCuaca,
+      kegiatanTerkini,
+      lastUpdated: new Date().toISOString()
     };
+
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    // LOG FAILED KE DATABASE
+    await logScraperExecution({
+      source: SOURCE_NAME,
+      status: 'FAILED',
+      itemsScraped: 0,
+      errorMessage
+    });
+
+    console.error(`[BMKG Scraper] Gagal scraping & dicatat ke log DB: ${errorMessage}`);
+    
+    // Lempar kembali error agar caller (seperti updateBMKGCache) dapat mengetahuinya
+    throw error;
   }
-
-  // 3. EXTRACTION: Kegiatan Terkini
-  const kegiatanTerkini: BMKGData['kegiatanTerkini'] = [];
-  const bigThumb = document.querySelector('#bmkg-news-section-unique .news-big-thumb');
-  if (bigThumb) {
-    const title = bigThumb.querySelector('.news-title-text')?.textContent.trim() || '';
-    const link = bigThumb.getAttribute('href') || '';
-    const image = bigThumb.querySelector('img')?.getAttribute('src') || '';
-    if (title) kegiatanTerkini.push({ title, link, image, isFeatured: true });
-  }
-
-  document.querySelectorAll('#bmkg-news-section-unique .news-side-grid .news-small-item').forEach((el) => {
-    const title = el.querySelector('.news-title-text')?.textContent.trim() || '';
-    const link = el.getAttribute('href') || '';
-    const image = el.querySelector('img')?.getAttribute('src') || '';
-    if (title) kegiatanTerkini.push({ title, link, image, isFeatured: false });
-  });
-
-  console.log(`[BMKG Scraper] Data berhasil diambil pada: ${new Date().toISOString()}`);
-  return {
-    peringatanIklim,
-    peringatanCuaca,
-    kegiatanTerkini,
-    lastUpdated: new Date().toISOString()
-  };
 }
 
 /**
  * Fungsi untuk meng-update cache secara periodik
  */
 export async function updateBMKGCache() {
+  const SOURCE_NAME = 'BMKG_SUMSEL';
+
   try {
     console.log('[BMKG Scraper] Mengambil data terbaru...');
     const data = await scrapeBMKGSumsel();
@@ -118,6 +167,17 @@ export async function updateBMKGCache() {
     await fs.writeFile(tmpFile, JSON.stringify(data, null, 2), 'utf-8');
     await fs.rename(tmpFile, DATA_FILE);
     cache.set(CACHE_KEY, data);
+    const totalItems =
+      (data.peringatanIklim?.length || 0) +
+      (data.kegiatanTerkini?.length || 0) +
+      (data.peringatanCuaca?.text ? 1 : 0);
+
+    // 1. Log SUCCESS ke DB
+    await logScraperExecution({
+      source: SOURCE_NAME,
+      status: 'SUCCESS',
+      itemsScraped: totalItems
+    });
     console.log(
       `[BMKG Scraper] Cache dan ${DATA_FILE} berhasil di-update pada: ${data.lastUpdated}`
     );
@@ -126,6 +186,12 @@ export async function updateBMKGCache() {
       '[BMKG Scraper] Gagal memperbarui cache dan file:',
       error instanceof Error ? error.message : error
     );
+    await logScraperExecution({
+      source: SOURCE_NAME,
+      status: 'FAILED',
+      itemsScraped: 0,
+      errorMessage: error instanceof Error ? error.message : String(error)
+    });
   }
 }
 
