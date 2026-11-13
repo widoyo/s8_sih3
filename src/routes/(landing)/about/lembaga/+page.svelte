@@ -70,6 +70,10 @@
                             <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
                             <span>tkpsdawsmsbl@gmail.com</span>
                         </a>
+                        <a href="https://sda.pu.go.id/balai/bbwssumatera8" target="_blank" rel="noopener noreferrer" class="link link-primary flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                            <span>sda.pu.go.id/balai/bbwssumatera8</span>
+                        </a>
                     </div>
                 </div>
             </div>

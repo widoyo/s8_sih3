@@ -81,19 +81,19 @@
 								if (stn.station_type === 1) {
 									iconHtml = '🌧️';
 									badgeColor = 'bg-info text-white';
-									typeName = 'ARR (Curah Hujan)';
+									typeName = 'Pos Hujan';
 									targetLayer = layerGroups.curahHujan;
 									arr++;
 								} else if (stn.station_type === 2) {
 									iconHtml = '💧';
 									badgeColor = 'bg-blue-600 text-white';
-									typeName = 'AWLR (Tinggi Muka Air)';
+									typeName = 'Pos Duga Air';
 									targetLayer = layerGroups.tma;
 									awlr++;
 								} else if (stn.station_type === 3) {
 									iconHtml = '⛅';
 									badgeColor = 'bg-warning text-black';
-									typeName = 'AWS (Stasiun Cuaca)';
+									typeName = 'Pos Klimatologi';
 									targetLayer = layerGroups.bmkgWarning;
 									aws++;
 								} else if (stn.station_type === 4) {
@@ -187,23 +187,19 @@
 			<div class="flex flex-wrap items-center gap-2">
 				<label class="cursor-pointer flex items-center gap-1.5 px-2 py-1 rounded-lg bg-base-200/80 hover:bg-base-200">
 					<input type="checkbox" bind:checked={overlayFilters.tma} class="checkbox checkbox-xs checkbox-primary" />
-					<span class="font-medium">Pos TMA ({stationCount.awlr || 7})</span>
+					<span class="font-medium">Pos Duga Air ({stationCount.awlr || 7})</span>
 				</label>
 				<label class="cursor-pointer flex items-center gap-1.5 px-2 py-1 rounded-lg bg-base-200/80 hover:bg-base-200">
 					<input type="checkbox" bind:checked={overlayFilters.curahHujan} class="checkbox checkbox-xs checkbox-info" />
-					<span class="font-medium">Curah Hujan ({stationCount.arr || 2})</span>
+					<span class="font-medium">Pos Curah Hujan ({stationCount.arr || 2})</span>
 				</label>
 				<label class="cursor-pointer flex items-center gap-1.5 px-2 py-1 rounded-lg bg-base-200/80 hover:bg-base-200">
 					<input type="checkbox" bind:checked={overlayFilters.bmkgWarning} class="checkbox checkbox-xs checkbox-warning" />
-					<span class="font-medium">Stasiun AWS ({stationCount.aws || 1})</span>
+					<span class="font-medium">Pos Klimatologi ({stationCount.aws || 1})</span>
 				</label>
 				<label class="cursor-pointer flex items-center gap-1.5 px-2 py-1 rounded-lg bg-base-200/80 hover:bg-base-200">
 					<input type="checkbox" bind:checked={overlayFilters.bendungan} class="checkbox checkbox-xs checkbox-accent" />
 					<span class="font-medium">CCTV ({stationCount.cctv || 1})</span>
-				</label>
-				<label class="cursor-pointer flex items-center gap-1.5 px-2 py-1 rounded-lg bg-base-200/80 hover:bg-base-200">
-					<input type="checkbox" bind:checked={overlayFilters.catEsdm} class="checkbox checkbox-xs checkbox-secondary" />
-					<span class="font-medium">CAT ESDM (8)</span>
 				</label>
 			</div>
 		</div>
