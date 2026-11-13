@@ -34,6 +34,14 @@
 				<House class="size-4 text-primary" />
 				<span>Home</span>
 			</a>
+			<!-- Hidrologi (Icon Hujan / Waves) -->
+			<a
+				href={resolve('/#hidrologi')}
+				class="btn gap-2 btn-ghost text-base font-normal btn-sm"
+			>
+				<Waves class="size-4 text-cyan-500" />
+				<span>Hidrologi</span>
+			</a>
 
 			<!-- Hidrometeorologi (Icon Angin) -->
 			<a
@@ -42,15 +50,6 @@
 			>
 				<Wind class="size-4 text-info" />
 				<span>Hidrometeorologi</span>
-			</a>
-
-			<!-- Hidrologi (Icon Hujan / Waves) -->
-			<a
-				href={resolve('/#hidrologi')}
-				class="btn gap-2 btn-ghost text-base font-normal btn-sm"
-			>
-				<Waves class="size-4 text-cyan-500" />
-				<span>Hidrologi</span>
 			</a>
 
 			<!-- Hidrogeologi (Icon Air Tanah / Droplets) -->
@@ -131,21 +130,21 @@
 			</a>
 
 			<a
-				href={resolve('/#hidrometeorologi')}
-				onclick={closeMobileMenu}
-				class="flex items-center gap-3 rounded-lg px-3 py-2 text-base hover:bg-base-200"
-			>
-				<Wind class="size-5 text-info" />
-				<span>Hidrometeorologi</span>
-			</a>
-
-			<a
 				href={resolve('/#hidrologi')}
 				onclick={closeMobileMenu}
 				class="flex items-center gap-3 rounded-lg px-3 py-2 text-base hover:bg-base-200"
 			>
 				<Waves class="size-5 text-cyan-500" />
 				<span>Hidrologi</span>
+			</a>
+
+			<a
+				href={resolve('/#hidrometeorologi')}
+				onclick={closeMobileMenu}
+				class="flex items-center gap-3 rounded-lg px-3 py-2 text-base hover:bg-base-200"
+			>
+				<Wind class="size-5 text-info" />
+				<span>Hidrometeorologi</span>
 			</a>
 
 			<a
@@ -206,7 +205,7 @@
         <div class="flex w-full flex-col items-center justify-between gap-4 px-4 py-6 sm:flex-row sm:px-6 lg:px-8">
             <div class="flex items-center gap-2 text-sm font-medium">
                 <Boxes class="size-5 text-primary" />
-                <span>SIH3 MSBL &copy; {new Date().getFullYear()} — Sistem Informasi Hidrometeorologi, Hidrologi, dan Hidrogeologi</span>
+                <span>SIH3 MSBL &copy; {new Date().getFullYear()} — Sistem Informasi Hidrologi, Hidrometeorologi, dan Hidrogeologi</span>
             </div>
             <div class="flex items-center gap-4 text-sm font-normal text-base-content/70">
                 <a href={resolve('/about')} class="hover:text-primary transition-colors">Tentang</a>
