@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { Feature, GeoJsonProperties } from 'geojson';
+	import { booleanPointInPolygon, point } from '@turf/turf';
+	import type { Feature, GeoJsonProperties, MultiPolygon, Polygon } from 'geojson';
 	import type { Layer } from 'leaflet';
 
 	interface Props {
@@ -8,11 +9,23 @@
 		showFilters?: boolean;
 	}
 
+	interface MapStation {
+		id: number;
+		station_name: string;
+		location?: string | null;
+		latitude: number;
+		longitude: number;
+		elevasi: number | null;
+		sungai: string | null;
+		station_type: number;
+	}
+
 	let { height = '500px', showFilters = true }: Props = $props();
 
 	let mapElement = $state<HTMLElement | null>(null);
 	let mapInstance = $state<any>(null);
 	let isMapLoaded = $state(false);
+	let stations = $state<MapStation[]>([]);
 	let stationCount = $state({ awlr: 0, arr: 0, aws: 0, cctv: 0 });
 	let riverNames = $state<string[]>([]);
 	let selectedRiver = $state('');
@@ -36,7 +49,27 @@
 		ws: true
 	});
 
-	function createWsPopup(properties: GeoJsonProperties): HTMLElement {
+	function isDasFeature(feature: Feature): feature is Feature<Polygon | MultiPolygon> {
+		return feature.geometry?.type === 'Polygon' || feature.geometry?.type === 'MultiPolygon';
+	}
+
+	function stationsInDas(feature: Feature<Polygon | MultiPolygon>): MapStation[] {
+		return stations
+			.filter((station) =>
+				booleanPointInPolygon(point([station.longitude, station.latitude]), feature)
+			)
+			.sort((a, b) => {
+				const aElevation =
+					typeof a.elevasi === 'number' && Number.isFinite(a.elevasi) ? a.elevasi : null;
+				const bElevation =
+					typeof b.elevasi === 'number' && Number.isFinite(b.elevasi) ? b.elevasi : null;
+				if (aElevation === null) return bElevation === null ? 0 : 1;
+				if (bElevation === null) return -1;
+				return bElevation - aElevation;
+			});
+	}
+
+	function createWsPopup(properties: GeoJsonProperties, dasStations: MapStation[]): HTMLElement {
 		const popup = document.createElement('div');
 		popup.className = 'min-w-56 text-xs';
 
@@ -70,6 +103,56 @@
 			row.append(propertyName, propertyValue);
 			popup.append(row);
 		}
+
+		const stationHeading = document.createElement('strong');
+		stationHeading.className = 'mb-2 mt-3 block text-sm';
+		stationHeading.textContent = `Pos dalam DAS (${dasStations.length})`;
+		popup.append(stationHeading);
+
+		if (dasStations.length === 0) {
+			const emptyMessage = document.createElement('p');
+			emptyMessage.textContent = 'Tidak ada pos pada DAS ini.';
+			popup.append(emptyMessage);
+			return popup;
+		}
+
+		const tableContainer = document.createElement('div');
+		tableContainer.className = 'max-h-64 overflow-x-auto overflow-y-auto';
+		const table = document.createElement('table');
+		table.className = 'w-full border-collapse text-left';
+		const tableHead = document.createElement('thead');
+		const headerRow = document.createElement('tr');
+		for (const header of ['ID Pos', 'Nama Pos', 'Elevasi', 'Nama Sungai (PDA)']) {
+			const cell = document.createElement('th');
+			cell.className = 'border-b border-base-300 px-2 py-1 font-semibold';
+			cell.textContent = header;
+			headerRow.append(cell);
+		}
+		tableHead.append(headerRow);
+
+		const tableBody = document.createElement('tbody');
+		for (const station of dasStations) {
+			const row = document.createElement('tr');
+			const values = [
+				String(station.id),
+				station.station_name,
+				typeof station.elevasi === 'number' && Number.isFinite(station.elevasi)
+					? `${station.elevasi} m`
+					: '-',
+				station.station_type === 2 ? station.sungai || '-' : '-'
+			];
+			for (const value of values) {
+				const cell = document.createElement('td');
+				cell.className = 'border-b border-base-200 px-2 py-1 align-top';
+				cell.textContent = value;
+				row.append(cell);
+			}
+			tableBody.append(row);
+		}
+
+		table.append(tableHead, tableBody);
+		tableContainer.append(table);
+		popup.append(tableContainer);
 
 		return popup;
 	}
@@ -134,6 +217,10 @@
 						const res = await fetch('/api/hidrologi/stations');
 						const data = await res.json();
 						if (data.success && Array.isArray(data.stations)) {
+							stations = data.stations.filter(
+								(station: MapStation) =>
+									Number.isFinite(station.latitude) && Number.isFinite(station.longitude)
+							);
 							let awlr = 0,
 								arr = 0,
 								aws = 0,
@@ -141,7 +228,7 @@
 							const stationRiverLayers = new Map<string, any>();
 							const stationRiverNames = new Set<string>();
 
-							data.stations.forEach((stn: any) => {
+							stations.forEach((stn) => {
 								if (!stn.latitude || !stn.longitude) return;
 
 								let iconHtml = '💧';
@@ -159,8 +246,7 @@
 									iconHtml = '💧';
 									badgeColor = 'bg-blue-600 text-white';
 									typeName = 'Pos Duga Air';
-									const riverName =
-										typeof stn.sungai === 'string' ? stn.sungai.trim() : '';
+									const riverName = typeof stn.sungai === 'string' ? stn.sungai.trim() : '';
 									let riverLayer = stationRiverLayers.get(riverName);
 									if (!riverLayer) {
 										riverLayer = L.layerGroup();
@@ -252,7 +338,8 @@
 									fillOpacity: 0.08
 								},
 								onEachFeature: (wsFeature: Feature, layer: Layer) => {
-									layer.bindPopup(createWsPopup(wsFeature.properties));
+									const matchingStations = isDasFeature(wsFeature) ? stationsInDas(wsFeature) : [];
+									layer.bindPopup(createWsPopup(wsFeature.properties, matchingStations));
 								}
 							}).addTo(dasLayer);
 
@@ -278,8 +365,7 @@
 						dasNames = [...wsDasNames]
 							.sort(
 								(a, b) =>
-									(wsDasAreas.get(b) ?? 0) - (wsDasAreas.get(a) ?? 0) ||
-									a.localeCompare(b, 'id')
+									(wsDasAreas.get(b) ?? 0) - (wsDasAreas.get(a) ?? 0) || a.localeCompare(b, 'id')
 							)
 							.slice(0, 10);
 					} catch (apiErr) {
@@ -416,50 +502,50 @@
 						aria-label="Filter layer peta"
 						class="dropdown-content z-[500] mt-2 flex w-64 flex-col gap-1 rounded-xl border border-base-200 bg-base-100 p-2 text-base-content shadow-xl"
 					>
-					<label
-						class="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 hover:bg-base-200"
-					>
-						<input
-							type="checkbox"
-							bind:checked={overlayFilters.tma}
-							class="checkbox checkbox-xs checkbox-primary"
-						/>
-						<span class="font-medium">Pos Duga Air ({stationCount.awlr || 7})</span>
-					</label>
-					<label
-						class="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 hover:bg-base-200"
-					>
-						<input
-							type="checkbox"
-							bind:checked={overlayFilters.curahHujan}
-							class="checkbox checkbox-xs checkbox-info"
-						/>
-						<span class="font-medium">Pos Curah Hujan ({stationCount.arr || 2})</span>
-					</label>
-					<label
-						class="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 hover:bg-base-200"
-					>
-						<input
-							type="checkbox"
-							bind:checked={overlayFilters.bmkgWarning}
-							class="checkbox checkbox-xs checkbox-warning"
-						/>
-						<span class="font-medium">Pos Klimatologi ({stationCount.aws || 1})</span>
-					</label>
-					<label
-						class="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 hover:bg-base-200"
-					>
-						<input
-							type="checkbox"
-							bind:checked={overlayFilters.bendungan}
-							class="checkbox checkbox-xs checkbox-accent"
-						/>
-						<span class="font-medium">CCTV ({stationCount.cctv || 1})</span>
-					</label>
+						<label
+							class="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 hover:bg-base-200"
+						>
+							<input
+								type="checkbox"
+								bind:checked={overlayFilters.tma}
+								class="checkbox checkbox-xs checkbox-primary"
+							/>
+							<span class="font-medium">Pos Duga Air ({stationCount.awlr || 7})</span>
+						</label>
+						<label
+							class="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 hover:bg-base-200"
+						>
+							<input
+								type="checkbox"
+								bind:checked={overlayFilters.curahHujan}
+								class="checkbox checkbox-xs checkbox-info"
+							/>
+							<span class="font-medium">Pos Curah Hujan ({stationCount.arr || 2})</span>
+						</label>
+						<label
+							class="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 hover:bg-base-200"
+						>
+							<input
+								type="checkbox"
+								bind:checked={overlayFilters.bmkgWarning}
+								class="checkbox checkbox-xs checkbox-warning"
+							/>
+							<span class="font-medium">Pos Klimatologi ({stationCount.aws || 1})</span>
+						</label>
+						<label
+							class="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 hover:bg-base-200"
+						>
+							<input
+								type="checkbox"
+								bind:checked={overlayFilters.bendungan}
+								class="checkbox checkbox-xs checkbox-accent"
+							/>
+							<span class="font-medium">CCTV ({stationCount.cctv || 1})</span>
+						</label>
 					</div>
 				{/if}
 			</div>
-			
+
 			<div class="dropdown dropdown-end" data-map-dropdown="river">
 				<button
 					type="button"
@@ -493,30 +579,30 @@
 						aria-label="Pilih sungai"
 						class="dropdown-content z-[500] mt-2 flex max-h-64 w-64 flex-col gap-1 overflow-y-auto rounded-xl border border-base-200 bg-base-100 p-2 text-base-content shadow-xl"
 					>
-					<button
-						type="button"
-						class="w-full rounded-lg px-3 py-2 text-left text-base-content hover:bg-base-200"
-						onclick={(event) => {
-							selectedRiver = '';
-							activeDropdown = null;
-							event.currentTarget.blur();
-						}}
-					>
-						Semua Sungai ({riverNames.length})
-					</button>
-					{#each riverNames as riverName (riverName)}
 						<button
 							type="button"
 							class="w-full rounded-lg px-3 py-2 text-left text-base-content hover:bg-base-200"
 							onclick={(event) => {
-								selectedRiver = riverName;
+								selectedRiver = '';
 								activeDropdown = null;
 								event.currentTarget.blur();
 							}}
 						>
-							{riverName}
+							Semua Sungai ({riverNames.length})
 						</button>
-					{/each}
+						{#each riverNames as riverName (riverName)}
+							<button
+								type="button"
+								class="w-full rounded-lg px-3 py-2 text-left text-base-content hover:bg-base-200"
+								onclick={(event) => {
+									selectedRiver = riverName;
+									activeDropdown = null;
+									event.currentTarget.blur();
+								}}
+							>
+								{riverName}
+							</button>
+						{/each}
 					</div>
 				{/if}
 			</div>
@@ -556,30 +642,30 @@
 						aria-label="Pilih DAS"
 						class="dropdown-content z-[500] mt-2 flex max-h-64 w-64 flex-col gap-1 overflow-y-auto rounded-xl border border-base-200 bg-base-100 p-2 text-base-content shadow-xl"
 					>
-					<button
-						type="button"
-						class="w-full rounded-lg px-3 py-2 text-left text-base-content hover:bg-base-200"
-						onclick={(event) => {
-							selectedDas = '';
-							activeDropdown = null;
-							event.currentTarget.blur();
-						}}
-					>
-						Semua DAS ({dasCount})
-					</button>
-					{#each dasNames as dasName (dasName)}
 						<button
 							type="button"
 							class="w-full rounded-lg px-3 py-2 text-left text-base-content hover:bg-base-200"
 							onclick={(event) => {
-								selectedDas = dasName;
+								selectedDas = '';
 								activeDropdown = null;
 								event.currentTarget.blur();
 							}}
 						>
-							{dasName}
+							Semua DAS ({dasCount})
 						</button>
-					{/each}
+						{#each dasNames as dasName (dasName)}
+							<button
+								type="button"
+								class="w-full rounded-lg px-3 py-2 text-left text-base-content hover:bg-base-200"
+								onclick={(event) => {
+									selectedDas = dasName;
+									activeDropdown = null;
+									event.currentTarget.blur();
+								}}
+							>
+								{dasName}
+							</button>
+						{/each}
 					</div>
 				{/if}
 			</div>
