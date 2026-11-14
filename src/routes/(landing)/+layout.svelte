@@ -61,14 +61,6 @@
 				<span>Hidrogeologi</span>
 			</a>
 
-			<a
-				href={resolve('/peta-gis')}
-				class="btn gap-2 btn-ghost text-base font-normal btn-sm"
-			>
-				<Map class="size-4 text-blue-600" />
-				<span>Peta GIS</span>
-			</a>
-
 			<!-- About page, dropdown  -->
 			<div class="dropdown dropdown-hover">
 				<button type="button" class="btn gap-2 btn-ghost text-base font-normal btn-sm">
@@ -156,14 +148,6 @@
 				<span>Hidrogeologi</span>
 			</a>
 
-			<a
-				href={resolve('/peta-gis')}
-				onclick={closeMobileMenu}
-				class="flex items-center gap-3 rounded-lg px-3 py-2 text-base hover:bg-base-200"
-			>
-				<Map class="size-5 text-blue-600" />
-				<span>Peta GIS</span>
-			</a>
 			<div class="border-t border-base-200 pt-2">
 				<p class="flex items-center gap-3 px-3 py-2 text-sm font-semibold text-base-content/70">
 					<Info class="size-5 text-primary" />

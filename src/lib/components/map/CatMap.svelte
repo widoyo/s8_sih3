@@ -87,7 +87,7 @@
 
 		async function loadMap() {
 			try {
-				const [L, response] = await Promise.all([import('leaflet'), fetch('/api/cat')]);
+				const [L, response] = await Promise.all([import('leaflet'), fetch('/api/map/cat')]);
 
 				if (!response.ok) {
 					throw new Error(`Permintaan data CAT gagal (${response.status}).`);
