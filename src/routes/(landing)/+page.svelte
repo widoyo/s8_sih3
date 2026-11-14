@@ -59,12 +59,17 @@
 </svelte:head>
 
 <!-- Hero Section -->
-<section id="top" class="relative hero flex min-h-screen items-center justify-center py-12">
+<section id="top" class="relative hero flex min-h-screen items-center justify-center py-12" style="background: linear-gradient(180deg, #0F2A56 0%, #0F2A56 25%, #fff 100%);">
+	<div
+		aria-hidden="true"
+		class="pointer-events-none absolute inset-0 bg-repeat"
+		style="background-image: url('/img/topographic-pattern.svg'); background-size: 600px 600px;"
+	></div>
 	<div class="hero-content z-10 my-auto w-full max-w-screen-xl flex-col text-center text-neutral-content drop-shadow-lg">
-		<div class="mb-8 max-w-2xl text-center text-base-content">
+		<div class="mb-8 max-w-2xl text-center text-white">
 			<h1 class="mb-4 text-4xl font-extrabold tracking-tight drop-shadow-lg md:text-5xl">SIH3 MSBL</h1>
-			<p class="text-sm leading-relaxed font-medium text-base-content/50 drop-shadow-md md:text-base">
-				Sistem Informasi Hidro Meteorologi, Hidrologi, & HidroGeologi<br /> Wilayah Sungai Musi Sugihan Banyuasin Lemau (WS MSBL)
+			<p class="text-sm leading-relaxed font-medium text-white/80 drop-shadow-md md:text-base">
+				Sistem Informasi Hidrologi, Hidro Meteorologi, & HidroGeologi<br /> Wilayah Sungai Musi Sugihan Banyuasin Lemau (WS MSBL)
 			</p>
 			<div class="mt-6">&nbsp;</div>
 		</div>
