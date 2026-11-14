@@ -1,7 +1,8 @@
 <script lang="ts">
 	import CatMap from '$lib/components/map/CatMap.svelte';
 	import StationCard from '$lib/components/StationCard.svelte';
-	import type { PrakiraanItem } from '../(app)/api/prakiraan/+server';
+	import type { PrakiraanItem } from '../api/prakiraan/+server';
+	import MapContainer from '$lib/components/map/MapContainer.svelte';
 
 	interface PageData {
 		prakiraanData: { updated_at: string | null; items: PrakiraanItem[] };
@@ -67,7 +68,7 @@
 			</p>
 			<div class="mt-6">&nbsp;</div>
 		</div>
-
+<MapContainer height="70vh" showFilters={true} />
 		<div class="grid w-full grid-cols-1 gap-4 text-left md:grid-cols-2">
 			<!-- Peringatan Dini Iklim -->
 			<details class="group card rounded-lg border border-black/10 bg-base-100/30 text-base-content shadow-xl backdrop-blur-md transition-all hover:bg-base-100/50">

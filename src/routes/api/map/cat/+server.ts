@@ -1,5 +1,5 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
-import catData from '$lib/assets/cat.geojson';
+import catData from '$lib/assets/cat.json';
 
 export const GET: RequestHandler = async () => {
 	return json(catData, {
