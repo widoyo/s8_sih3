@@ -9,7 +9,7 @@
 		<div>
 			<p class="m-0 text-lg leading-relaxed md:text-xl md:leading-loose">
 				Portal SIH3 Wilayah Sungai Musi-Sugihan-Banyuasin-Lemau (MSBL) menyediakan data akurat
-				mengenai Hidrometeorologi, Hidrologi, dan Hidrogeologi. Platform ini hadir untuk mempermudah
+				mengenai Hidrologi, Hidrometeorologi, dan Hidrogeologi. Platform ini hadir untuk mempermudah
 				akses informasi bagi masyarakat, sekaligus mendukung pengelolaan sumber daya air serta
 				mitigasi risiko bencana secara efektif.
 			</p>
