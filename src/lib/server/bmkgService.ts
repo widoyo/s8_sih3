@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { parseHTML } from 'linkedom';
 
+import { syncPeringatanDiniToDB } from '$lib/server/services/peringatanDiniBmkgService';
 import { logScraperExecution } from '$lib/server/services/scraperLogService';
 
 interface BMKGData {
@@ -162,6 +163,9 @@ export async function updateBMKGCache() {
   try {
     console.log('[BMKG Scraper] Mengambil data terbaru...');
     const data = await scrapeBMKGSumsel();
+
+    await syncPeringatanDiniToDB(data.peringatanCuaca);
+    
     await fs.mkdir(DATA_DIR, { recursive: true });
     const tmpFile = `${DATA_FILE}.tmp`;
     await fs.writeFile(tmpFile, JSON.stringify(data, null, 2), 'utf-8');

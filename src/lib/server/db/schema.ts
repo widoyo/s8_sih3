@@ -96,6 +96,8 @@ export const posHidrologi = sqliteTable('pos_hidrologi', {
 	latitude: real('latitude'),
 	longitude: real('longitude'),
 	elevasi: real('elevasi'),
+	atabStationId: integer('atab_station_id').unique(),
+	flowDirectionDegrees: real('flow_direction_degrees'),
 	alertStatus: text('alert_status').default('NORMAL'), // 'NORMAL' | 'WASPADA' | 'SIAGA' | 'AWAS'
 	lastValue: real('last_value'),
 	unit: text('unit').default('m'),
@@ -147,3 +149,27 @@ export const scraperLogs = sqliteTable('scraper_logs', {
 export type ScraperLog = typeof scraperLogs.$inferSelect;
 export type NewScraperLog = typeof scraperLogs.$inferInsert;
 
+
+export const peringatanDini = sqliteTable('peringatan_dini', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()), // Generate UUID otomatis
+  
+  waktuPeringatan: text('waktu_peringatan')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()), // Waktu sistem mencatat
+  
+  teks: text('teks').notNull(), // Isi lengkap peringatan dari BMKG
+  
+  status: text('status', { enum: ['AKTIF', 'KADALUWARSA'] })
+    .notNull()
+    .default('AKTIF'),
+  
+  createdAt: text('created_at')
+    .notNull()
+    .default(sql`(CURRENT_TIMESTAMP)`),
+    
+  updatedAt: text('updated_at')
+    .notNull()
+    .default(sql`(CURRENT_TIMESTAMP)`),
+});

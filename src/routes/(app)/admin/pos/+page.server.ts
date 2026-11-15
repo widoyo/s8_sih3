@@ -25,6 +25,8 @@ export const load: PageServerLoad = async ({ locals }) => {
             lat: posHidrologi.latitude,
             lon: posHidrologi.longitude,
             elevasi: posHidrologi.elevasi,
+            atabStationId: posHidrologi.atabStationId,
+            flowDirectionDegrees: posHidrologi.flowDirectionDegrees,
             status: posHidrologi.alertStatus,
             lembagaNama: lembagas.nama,
             dasNama: das.nama,
@@ -72,14 +74,54 @@ export const actions: Actions = {
         const latStr = formData.get('lat')?.toString();
         const lonStr = formData.get('lon')?.toString();
         const elevasiStr = formData.get('elevasi')?.toString();
+        const atabStationIdStr = formData.get('atabStationId')?.toString().trim() ?? '';
+        const flowDirectionDegreesStr = formData.get('flowDirectionDegrees')?.toString().trim() ?? '';
         const status = formData.get('status')?.toString() || 'AKTIF';
         const lembagaIdInput = formData.get('lembagaId')?.toString();
         const dasIdStr = formData.get('dasId')?.toString();
+        const dasId = dasIdStr ? Number(dasIdStr) : null;
+        const atabStationId =
+            tipe === 'DUGA AIR' && atabStationIdStr ? Number(atabStationIdStr) : null;
+        const flowDirectionDegrees =
+            tipe === 'DUGA AIR' && flowDirectionDegreesStr
+                ? Number(flowDirectionDegreesStr)
+                : null;
 
-        if (!nama || !kode || !tipe || !latStr || !lonStr) {
+        if (
+            !nama ||
+            !kode ||
+            !tipe ||
+            !latStr ||
+            !lonStr
+        ) {
             return fail(400, {
                 success: false,
                 message: 'Nama, Kode, Tipe, Latitude, dan Longitude wajib diisi.'
+            });
+        }
+
+        if (dasId !== null && (!Number.isSafeInteger(dasId) || dasId <= 0)) {
+            return fail(400, {
+                success: false,
+                message: 'DAS yang dipilih tidak valid.'
+            });
+        }
+
+        if (
+            (atabStationIdStr &&
+                (atabStationId === null ||
+                    !Number.isSafeInteger(atabStationId) ||
+                    atabStationId <= 0)) ||
+            (flowDirectionDegreesStr &&
+                (flowDirectionDegrees === null ||
+                    !Number.isFinite(flowDirectionDegrees) ||
+                    flowDirectionDegrees < 0 ||
+                    flowDirectionDegrees >= 360)) ||
+            (flowDirectionDegrees !== null && atabStationId === null)
+        ) {
+            return fail(400, {
+                success: false,
+                message: 'ID ATAB harus bilangan bulat positif dan arah aliran harus 0 sampai kurang dari 360 derajat.'
             });
         }
 
@@ -97,9 +139,11 @@ export const actions: Actions = {
             latitude: parseFloat(latStr),
             longitude: parseFloat(lonStr),
             elevasi: elevasiStr ? parseFloat(elevasiStr) : null,
+            atabStationId,
+            flowDirectionDegrees,
             alertStatus: status,
             lembagaId: targetLembagaId,
-            dasId: dasIdStr || null
+            dasId
         };
 
         if (idStr) {
@@ -120,6 +164,19 @@ export const actions: Actions = {
                 }
             }
 
+            if (atabStationId !== null) {
+                const duplicate = await db
+                    .select({ id: posHidrologi.id })
+                    .from(posHidrologi)
+                    .where(eq(posHidrologi.atabStationId, atabStationId));
+                if (duplicate.some((station) => station.id !== id)) {
+                    return fail(409, {
+                        success: false,
+                        message: `ID ATAB ${atabStationId} sudah ditautkan ke Pos lain.`
+                    });
+                }
+            }
+
             await db.update(posHidrologi).set(payload).where(eq(posHidrologi.id, id));
 
             await db.insert(userLogs).values({
@@ -131,6 +188,19 @@ export const actions: Actions = {
 
             return { success: true, message: `Pos "${nama}" berhasil diperbarui.` };
         } else {
+            if (atabStationId !== null) {
+                const duplicate = await db
+                    .select({ id: posHidrologi.id })
+                    .from(posHidrologi)
+                    .where(eq(posHidrologi.atabStationId, atabStationId));
+                if (duplicate.length > 0) {
+                    return fail(409, {
+                        success: false,
+                        message: `ID ATAB ${atabStationId} sudah ditautkan ke Pos lain.`
+                    });
+                }
+            }
+
             // Create Pos Baru
             const inserted = await db
                 .insert(posHidrologi)

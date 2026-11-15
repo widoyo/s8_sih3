@@ -15,6 +15,8 @@
 	let lat = $state('');
 	let lon = $state('');
 	let elevasi = $state('');
+	let atabStationId = $state('');
+	let flowDirectionDegrees = $state('');
 	let status = $state('AKTIF');
 	let lembagaId = $state('');
 	let dasId = $state('');
@@ -32,6 +34,11 @@
 			lat = posItem.lat?.toString() || '';
 			lon = posItem.lon?.toString() || '';
 			elevasi = posItem.elevasi !== null ? posItem.elevasi.toString() : '';
+			atabStationId = posItem.atabStationId?.toString() || '';
+			flowDirectionDegrees =
+				posItem.flowDirectionDegrees !== null
+					? posItem.flowDirectionDegrees.toString()
+					: '';
 			status = posItem.status || 'AKTIF';
 			lembagaId = posItem.lembagaId ? posItem.lembagaId.toString() : '';
 			dasId = posItem.dasId ? posItem.dasId.toString() : '';
@@ -43,6 +50,8 @@
 			lat = '';
 			lon = '';
 			elevasi = '';
+			atabStationId = '';
+			flowDirectionDegrees = '';
 			status = 'AKTIF';
 			// Set default lembagaId ke milik user jika ada
 			lembagaId = data.userLembagaId ? data.userLembagaId.toString() : '';
@@ -92,6 +101,7 @@
 					<th>Nama Pos</th>
 					<th>Tipe</th>
 					<th>Koordinat (3D)</th>
+					<th>ID ATAB / Arah</th>
 					<th>DAS / Lembaga</th>
 					<th>Status</th>
 					<th class="text-right">Aksi</th>
@@ -126,6 +136,12 @@
 								<span class="text-base-content/50">({item.elevasi} m)</span>
 							{/if}
 						</td>
+						<td class="font-mono text-xs">
+							<div>{item.atabStationId ?? '-'}</div>
+							<div class="text-base-content/60">
+								{item.flowDirectionDegrees === null ? '-' : `${item.flowDirectionDegrees}°`}
+							</div>
+						</td>
 						<td class="text-xs text-base-content/70">
 							<div>{item.dasNama || '-'}</div>
 							<div class="text-[10px] opacity-50">{item.lembagaNama || '-'}</div>
@@ -149,7 +165,7 @@
 					</tr>
 				{:else}
 					<tr>
-						<td colspan="7" class="py-6 text-center text-xs opacity-60"
+						<td colspan="8" class="py-6 text-center text-xs opacity-60"
 							>Belum ada data pos hidrologi.</td
 						>
 					</tr>
@@ -207,6 +223,46 @@
 					/>
 				</div>
 			</div>
+
+			{#if tipe === 'DUGA AIR'}
+				<div class="grid grid-cols-2 gap-2 rounded-lg border border-base-300 p-3">
+					<div class="form-control">
+						<label class="label p-1" for="atabStationId">
+							<span class="label-text text-xs">ID Pos ATAB</span>
+						</label>
+						<input
+							id="atabStationId"
+							name="atabStationId"
+							type="number"
+							min="1"
+							step="1"
+							class="input-bordered input input-sm"
+							placeholder="ID dari ATAB"
+							bind:value={atabStationId}
+						/>
+					</div>
+					<div class="form-control">
+						<label class="label p-1" for="flowDirectionDegrees">
+							<span class="label-text text-xs">Arah aliran (° dari utara)</span>
+						</label>
+						<input
+							id="flowDirectionDegrees"
+							name="flowDirectionDegrees"
+							type="number"
+							min="0"
+							max="359.999"
+							step="any"
+							class="input-bordered input input-sm"
+							placeholder="0–<360"
+							bind:value={flowDirectionDegrees}
+						/>
+					</div>
+					<p class="col-span-2 text-[10px] text-base-content/60">
+						0° = utara, 90° = timur, 180° = selatan, 270° = barat. Arah hanya tampil pada peta jika
+						ID ATAB ditautkan.
+					</p>
+				</div>
+			{/if}
 
 			<div class="grid grid-cols-2 gap-2">
 				<div class="form-control">
