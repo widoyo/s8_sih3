@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ChevronRight } from '@lucide/svelte';
 	import CatMap from '$lib/components/map/CatMap.svelte';
 	import StationCard from '$lib/components/StationCard.svelte';
 	import type { PrakiraanItem } from '../api/prakiraan/+server';
@@ -44,6 +45,20 @@
 		});
 	}
 
+	function scrollToMap() {
+		document.getElementById('map-container')?.scrollIntoView({
+			behavior: 'smooth',
+			block: 'start'
+		});
+	}
+
+	function scrollToTop() {
+		document.getElementById('top')?.scrollIntoView({
+			behavior: 'smooth',
+			block: 'start'
+		});
+	}
+
 	// Svelte 5 State
 	let activeHydroTab = $state<'all' | 'arr' | 'awlr' | 'aws'>('all');
 
@@ -58,79 +73,46 @@
 	<title>SIH3 MSBL</title>
 </svelte:head>
 
-<!-- Hero Section -->
-<section id="top" class="relative hero flex min-h-screen items-center justify-center py-12" style="background: linear-gradient(180deg, #0F2A56 0%, #0F2A56 25%, #fff 100%);">
+<!-- Hero / Intro Section -->
+<section
+	id="top"
+	class="relative flex min-h-[55vh] flex-col items-center justify-center overflow-hidden px-4 py-24 text-center md:min-h-[60vh] md:py-32"
+	style="background: linear-gradient(180deg, #0F2A56 0%, #0F2A56 45%, #fff 100%);"
+>
 	<div
 		aria-hidden="true"
 		class="pointer-events-none absolute inset-0 bg-repeat"
 		style="background-image: url('/img/topographic-pattern.svg'); background-size: 600px 600px;"
 	></div>
-	<div class="hero-content z-10 my-auto w-full max-w-screen-xl flex-col text-center text-neutral-content drop-shadow-lg">
-		<div class="mb-8 max-w-2xl text-center text-white">
-			<h1 class="mb-4 text-4xl font-extrabold tracking-tight drop-shadow-lg md:text-5xl">SIH3 MSBL</h1>
-			<p class="text-sm leading-relaxed font-medium text-white/80 drop-shadow-md md:text-base">
-				Sistem Informasi Hidrologi, Hidro Meteorologi, & HidroGeologi<br /> Wilayah Sungai Musi Sugihan Banyuasin Lemau (WS MSBL)
+
+	<div class="relative z-10 mx-auto w-full max-w-screen-xl text-white drop-shadow-lg">
+		<div class="mx-auto max-w-3xl">
+			<h1 class="mb-5 text-4xl font-extrabold tracking-tight drop-shadow-lg md:text-6xl">SIH3 MSBL</h1>
+			<p class="text-sm leading-relaxed font-medium text-white/80 drop-shadow-md md:text-lg">
+				Sistem Informasi Hidrologi, Hidro Meteorologi, &amp; HidroGeologi<br />
+				Wilayah Sungai Musi Sugihan Banyuasin Lemau (WS MSBL)
 			</p>
-			<div class="mt-6">&nbsp;</div>
+			<button
+				onclick={scrollToMap}
+				class="btn btn-outline btn-lg mt-10 border-white text-white shadow-lg bg-[#F7A800] hover:bg-white hover:text-[#F7A800] transition-colors duration-300"
+			>
+				Peta Monitoring
+				<svg xmlns="http://www.w3.org/2000/svg" class="size-5 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7" />
+				</svg>
+			</button>
 		</div>
-<MapContainer height="70vh" showFilters={true} />
-		<div class="grid w-full grid-cols-1 gap-4 text-left md:grid-cols-2">
-			<!-- Peringatan Dini Iklim -->
-			<details class="group card rounded-lg border border-black/10 bg-base-100/30 text-base-content shadow-xl backdrop-blur-md transition-all hover:bg-base-100/50">
-				<summary class="card-body cursor-pointer list-none p-2">
-					<div class="flex items-center gap-3">
-						<div class="rounded-lg bg-warning/20 p-2.5 text-warning">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-							</svg>
-						</div>
-						<h2 class="card-title">Peringatan Dini Iklim</h2>
-						<span class="badge badge-accent">{peringatanIklim.length} info</span>
-						<svg xmlns="http://www.w3.org/2000/svg" class="ml-auto size-5 shrink-0 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7" />
-						</svg>
-					</div>
-				</summary>
-				<div class="px-4 pb-4">
-					{#if peringatanIklim.length}
-						<ul class="space-y-3 border-t border-base-content/10 pt-3 text-left">
-							{#each peringatanIklim as item (item.link || item.title)}
-								<li>
-									{#if item.link}
-										<a href={item.link} target="_blank" rel="noopener noreferrer" class="link font-semibold link-hover">{item.title}</a>
-									{:else}
-										<h3 class="font-semibold">{item.title}</h3>
-									{/if}
-									{#if item.description}
-										<p class="mt-1 text-sm text-base-content/70">{item.description}</p>
-									{/if}
-								</li>
-							{/each}
-						</ul>
-					{:else}
-						<p class="border-t border-base-content/10 pt-3 text-left text-sm text-base-content/70">Tidak ada informasi peringatan iklim.</p>
-					{/if}
-				</div>
-			</details>
+	</div>
+</section>
 
-			<!-- Card 2: Hujan & Muka Air Sungai -->
-			<div class="card rounded-lg border border-black/10 bg-base-100/30 text-base-content shadow-xl backdrop-blur-md transition-all hover:bg-base-100/50">
-				<div class="card-body p-2">
-					<div class="mb-1 flex items-center gap-3">
-						<div class="rounded-lg bg-info/10 p-2.5 text-info">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-							</svg>
-						</div>
-						<h2 class="card-title text-base font-bold">Hujan & Muka Air Sungai</h2>
-					</div>
-					<p class="text-sm text-base-content/70 px-2">
-						Lihat monitoring real-time {hydroStats.total} pos di bagian <a href="#hidrologi" class="link link-primary font-bold">Hidrologi</a> di bawah.
-					</p>
-				</div>
-			</div>
-		</div>
+<!-- Full-screen Map -->
+<section id="map-container" class="h-dvh min-h-[500px] w-full scroll-mt-0">
+	<MapContainer height="100dvh" showFilters={true} />
+</section>
 
+<!-- Intro Information: Alerts and News -->
+<section class="relative bg-base-100 px-4 py-12 md:py-16">
+	<div class="mx-auto w-full max-w-screen-xl">
 		<!-- Berita Kegiatan -->
 		<div class="mt-6 w-full rounded-lg bg-base-100/90 p-5 text-left text-base-content">
 			<h2 class="mb-4 text-3xl font-extrabold drop-shadow-lg md:text-4xl">Berita Kegiatan</h2>
@@ -166,6 +148,10 @@
 				<p class="mt-1 text-xs text-base-content/70 md:text-sm">Wilayah Sumatera Selatan & Sekitarnya</p>
 			</div>
 		</div>
+		<div class="self-start rounded-lg border border-base-300 bg-base-100 px-3 py-1.5 text-xs text-base-content/60 shadow-xs md:self-auto">
+			Diperbarui: <span class="font-mono font-semibold text-primary">{lastUpdated} WIB</span>
+		</div>
+
 
 		<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 			<figure class="overflow-hidden">
@@ -180,57 +166,66 @@
 			</figure>
 		</div>
 		
-		<div class="self-start rounded-lg border border-base-300 bg-base-100 px-3 py-1.5 text-xs text-base-content/60 shadow-xs md:self-auto">
+				<!-- Daftar Prakiraan Cuaca (1 Baris per Item) -->
+		<div class="self-start py-1.5 text-xs text-base-content/60 md:self-auto">
 			Diperbarui: <span class="font-mono font-semibold text-primary">{lastUpdated} WIB</span>
 		</div>
-
-		<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-			{#if prakiraanItems.length > 0}
-				{#each prakiraanItems as item (item.lokasi)}
-					<div class="card border border-base-300 bg-base-100 shadow-sm transition-all duration-200 hover:shadow-md">
-						<div class="card-body space-y-3 p-4">
-							<div class="flex items-center justify-between border-b border-base-200 pb-2">
-								<h3 class="truncate text-base font-bold text-base-content" title={item.lokasi}>{item.lokasi}</h3>
-								{#if item.url_detail && item.url_detail !== '-'}
-									<a href={item.url_detail} target="_blank" rel="noopener noreferrer" class="btn gap-1 btn-ghost text-primary btn-xs" title="Lihat detail di BMKG">
-										Detail
-										<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-3">
-											<path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-										</svg>
-									</a>
-								{/if}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+	{#if prakiraanItems.length > 0}
+		{#each prakiraanItems as item (item.lokasi)}
+			<div class="flex items-center justify-between gap-3 p-3 rounded-lg border border-base-300 bg-base-100 shadow-sm transition-all duration-200 hover:shadow-md hover:border-primary/30 h-full">
+				
+				<!-- Bagian Kiri: Label "Hari ini" + Nama Kabupaten -->
+				<div class="flex-1 min-w-0 pr-2 flex flex-col">
+					<span class="text-xs text-base-content/60 leading-tight">Hari ini</span>
+					<span class="font-bold text-base-content truncate" title={item.lokasi}>
+						{item.lokasi}
+					</span>
+				</div>
+				
+				<!-- Bagian Kanan: Area Klik Luas (Ikon + Teks + Chevron) -->
+				{#if item.url_detail && item.url_detail !== '-'}
+					<a 
+						href={item.url_detail} 
+						target="_blank" 
+						rel="noopener noreferrer" 
+						class="flex items-center gap-3 p-2 rounded-lg hover:bg-base-200 transition-colors shrink-0 group"
+						title="Lihat detail prakiraan {item.lokasi}"
+					>
+						<!-- Kolom Vertikal: Ikon di atas, Teks di bawah -->
+						<div class="flex flex-col items-center gap-1">
+							<div class="flex items-center justify-center [&>svg]:size-8 [&>img]:size-8 transition-transform duration-200 group-hover:scale-110">
+								{@html item.hari_ini.ikon}
 							</div>
-							<div class="grid grid-cols-2 gap-2 divide-x divide-base-200 text-xs">
-								<div class="space-y-1.5 pr-1">
-									<span class="badge badge-outline badge-xs text-[10px] font-semibold">Hari Ini</span>
-									<div class="my-1 flex min-h-[40px] items-center gap-2">
-										<div class="flex size-9 shrink-0 items-center justify-center">{@html item.hari_ini.ikon}</div>
-										<span class="text-xs leading-tight font-bold text-base-content/90">{item.hari_ini.kondisi.kondisi}</span>
-									</div>
-									<div class="space-y-0.5 font-mono text-[11px] text-base-content/70">
-										<div class="flex justify-between"><span>Suhu:</span><span class="font-bold text-base-content">{item.hari_ini.kondisi.suhu}</span></div>
-										<div class="flex justify-between"><span>Lembap:</span><span>{item.hari_ini.kondisi.kelembapan}</span></div>
-									</div>
-								</div>
-								<div class="space-y-1.5 pl-3">
-									<span class="badge badge-ghost badge-xs text-[10px] font-semibold">Besok</span>
-									<div class="my-1 flex min-h-[40px] items-center gap-2">
-										<div class="flex size-9 shrink-0 items-center justify-center">{@html item.besok.ikon}</div>
-										<span class="text-xs leading-tight font-bold text-base-content/90">{item.besok.kondisi.kondisi}</span>
-									</div>
-									<div class="space-y-0.5 font-mono text-[11px] text-base-content/70">
-										<div class="flex justify-between"><span>Suhu:</span><span class="font-bold text-base-content">{item.besok.kondisi.suhu}</span></div>
-										<div class="flex justify-between"><span>Lembap:</span><span>{item.besok.kondisi.kelembapan}</span></div>
-									</div>
-								</div>
+							<span class="text-xs text-base-content/80 text-center leading-tight font-normal max-w-[120px]">
+								{item.hari_ini.kondisi.kondisi}
+							</span>
+						</div>
+						
+						<!-- Ikon Panah dari Lucide -->
+						<ChevronRight class="size-5 text-primary transition-transform duration-200 group-hover:translate-x-1 shrink-0" />
+					</a>
+				{:else}
+					<!-- Fallback: Tampilan tetap rapi meski tidak ada link -->
+					<div class="flex items-center gap-3 p-2 shrink-0">
+						<div class="flex flex-col items-center gap-1">
+							<div class="flex items-center justify-center [&>svg]:size-8 [&>img]:size-8">
+								{@html item.hari_ini.ikon}
 							</div>
+							<span class="text-xs text-base-content/80 text-center leading-tight font-normal max-w-[120px]">
+								{item.hari_ini.kondisi.kondisi}
+							</span>
 						</div>
 					</div>
-				{/each}
-			{:else}
-				<div class="col-span-full alert text-xs alert-warning">Data prakiraan cuaca belum tersedia.</div>
-			{/if}
+				{/if}
+			</div>
+		{/each}
+	{:else}
+		<div class="col-span-full alert alert-warning text-xs">
+			Data prakiraan cuaca belum tersedia.
 		</div>
+	{/if}
+</div>
 	</div>
 </section>
 
@@ -304,3 +299,16 @@
 		</div>
 	</div>
 </section>
+
+<!-- Floating Back-to-Top Button -->
+<button
+	type="button"
+	class="btn btn-circle btn-primary btn-lg fixed right-4 bottom-4 z-[1000] shadow-xl md:right-6 md:bottom-6"
+	onclick={scrollToTop}
+	aria-label="Kembali ke atas"
+	title="Kembali ke atas"
+>
+	<svg xmlns="http://www.w3.org/2000/svg" class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+		<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 15 7-7 7 7" />
+	</svg>
+</button>
