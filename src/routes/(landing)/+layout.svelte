@@ -4,7 +4,8 @@
 	import { page } from '$app/state';
 	import { 
 		House, Wind, Waves, Droplets, Menu, X, Building2, KeyRound, 
-		Boxes, Info, Map, Contact, Megaphone 
+		Boxes, Info, Map, Contact, Siren
+
 	} from '@lucide/svelte';
 
 	let { children, data } = $props();
@@ -112,7 +113,7 @@
 							: (isMangoNav ? 'text-white' : 'text-base-content')
 					}`}
 				>
-					<Megaphone class={`size-4 ${hasWarning ? 'text-red-600' : (isMangoNav ? 'text-white' : 'text-primary')}`} />
+					<Siren class={`size-4 ${hasWarning ? 'text-red-600' : (isMangoNav ? 'text-white' : 'text-primary')}`} />
 					<span class="font-semibold">EWS</span>
 					
 					<!-- Badge indikator kecil hanya muncul saat ada peringatan -->
@@ -126,7 +127,7 @@
 					{#if hasWarning}
 						<!-- Tampilan saat ADA Peringatan (Tema Merah) -->
 						<div class="flex items-start gap-3">
-							<Megaphone class="size-5 text-red-600 mt-1 flex-shrink-0" />
+							<Siren class="size-5 text-red-600 mt-1 flex-shrink-0" />
 							<div class="w-full">
 								<h3 class="font-bold text-red-700 text-sm mb-1 flex items-center gap-2">
 									Peringatan Dini Aktif
@@ -143,7 +144,7 @@
 					{:else}
 						<!-- Tampilan saat AMAN (Tema Netral) -->
 						<div class="flex flex-col items-center justify-center gap-2 py-4 text-base-content/70">
-							<Megaphone class="size-8 text-gray-300" />
+							<Siren class="size-8 text-gray-300" />
 							<span class="text-sm font-medium text-center">Tidak ada peringatan dini cuaca aktif.</span>
 							<span class="text-xs text-base-content/50 text-center">Kondisi cuaca terpantau aman.</span>
 						</div>
@@ -153,49 +154,49 @@
 			
 		</div>
 
-		<!-- Mobile Burger Menu Button -->
-		<div class="flex w-full items-center justify-between md:hidden">
-			<span class={`text-base font-bold ${isMangoNav ? 'text-white' : 'text-base-content'}`}>SIH3 MSBL</span>
-			<button
-				type="button"
-				onclick={toggleMobileMenu}
-				class={`btn btn-square btn-ghost btn-sm ${isMangoNav ? 'text-white' : ''}`}
-				aria-label="Toggle Menu"
-			>
-				{#if mobileMenuOpen}
-					<X class="size-5" />
-				{:else}
-					<Menu class="size-5" />
-				{/if}
-			</button>
-		</div>
+<!-- Mobile Burger Menu Button -->
+<div class="flex w-full items-center justify-between md:hidden">
+	<span class={`text-base font-bold ${isMangoNav ? 'text-white' : 'text-base-content'}`}>SIH3 MSBL</span>
+	
+	<!-- Container Kanan: EWS + Burger Menu (Mepet) -->
+	<div class="flex items-center gap-2">
+		<!-- EWS Mobile Block - Warna Dinamis -->
+		{#if hasWarning}
+			<div class={`rounded-lg border p-2 animate-pulse ${isMangoNav ? 'bg-white/10 border-white/20' : 'bg-red-50 border-red-200'}`}>
+				<div class="flex items-center gap-1.5">
+					<Siren class={`size-4 ${isMangoNav ? 'text-white' : 'text-red-600'}`} />
+					<span class={`font-bold text-sm ${isMangoNav ? 'text-white' : 'text-red-700'}`}>EWS</span>
+					<span class="badge badge-xs badge-error text-white">!</span>
+				</div>
+			</div>
+		{:else}
+			<div class={`flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm ${isMangoNav ? 'text-white/70' : 'text-base-content/70'}`}>
+				<Siren class="size-4" />
+				<span>EWS</span>
+			</div>
+		{/if}
+		
+		<!-- Burger Menu Button -->
+		<button
+			type="button"
+			onclick={toggleMobileMenu}
+			class={`btn btn-square btn-ghost btn-sm ${isMangoNav ? 'text-white' : ''}`}
+			aria-label="Toggle Menu"
+		>
+			{#if mobileMenuOpen}
+				<X class="size-5" />
+			{:else}
+				<Menu class="size-5" />
+			{/if}
+		</button>
+	</div>
+</div>
 	</div>
 
 	<!-- Mobile Drawer Menu -->
 	{#if mobileMenuOpen}
 		<div class={`space-y-2 border-t border-base-200 px-4 py-3 transition-colors md:hidden ${isMangoNav ? 'bg-[#F7A800]' : 'bg-base-100'}`}>
 			
-			<!-- EWS Mobile Block - Warna Dinamis -->
-			{#if hasWarning}
-				<div class="rounded-lg bg-red-50 border border-red-200 p-3 my-2 animate-pulse">
-					<div class="flex items-center gap-2 mb-2">
-						<Megaphone class="size-5 text-red-600" />
-						<span class="font-bold text-red-700 text-sm">PERINGATAN DINI AKTIF</span>
-						<span class="badge badge-xs badge-error text-white">!</span>
-					</div>
-					<p class="text-xs text-base-content whitespace-pre-wrap leading-relaxed mb-2 max-h-40 overflow-y-auto custom-scrollbar">
-						{data.peringatanCuacaAktif.teks}
-					</p>
-					<p class="text-[10px] text-base-content/60 text-right">
-						{new Date(data.peringatanCuacaAktif.waktuPeringatan).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}
-					</p>
-				</div>
-			{:else}
-				<div class="flex items-center gap-3 rounded-lg px-3 py-2 text-base text-base-content/70 my-2">
-					<Megaphone class="size-5 text-gray-400" />
-					<span>Tidak ada peringatan aktif</span>
-				</div>
-			{/if}
 
 			<a href={resolve('/#top')} data-sveltekit-reload onclick={closeMobileMenu} class={`flex items-center gap-3 rounded-lg px-3 py-2 text-base hover:bg-transparent ${isMangoNav ? 'text-white' : ''}`}>
 				<House class="size-5 text-primary" />
